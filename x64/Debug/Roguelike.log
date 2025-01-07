@@ -1,0 +1,4 @@
+﻿  Roguelike.cpp
+C:\Users\toddd\Desktop\Roguelike\Roguelike\Roguelike.cpp(25,15): warning C4101: 'event': unreferenced local variable
+  Roguelike.vcxproj -> C:\Users\toddd\Desktop\Roguelike\x64\Debug\Roguelike.exe
+  15 File(s) copied

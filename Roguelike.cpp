@@ -1,20 +1,49 @@
-// Roguelike.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 
-int main()
-{
+#include "RenderWindow.h"
+#include "InputManager.h"
+
+int main(int argc, char* argv[]) {
+
+    SDL_Init(SDL_INIT_EVERYTHING);
+    IMG_Init(IMG_INIT_PNG);
+    TTF_Init();
+
+    RenderWindow screen("", 1280, 720);
+    screen.setBackgroundColor(255, 255, 255);
+    screen.setFontColor(0, 0, 0);
+
+    InputManager pad;
+
+    SDL_Texture* testTexture = screen.loadTexture("Assets/Images/test.png");
+
+    bool running = true;
+
+    SDL_Event event;
+
+    int x = 0;
+
+    while (running) {
+        pad.update();
+
+        if (pad.quit) {
+            running = false;
+        }
+
+        x++;
+
+        screen.clear();
+
+        screen.printf(10, 10, "Hello, World! %i", x);
+        screen.blit(100, 100, testTexture);
+
+        screen.flip();
+        pad.lateUpdate();
+    }
+
     std::cout << "Hello World!\n";
+    return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
