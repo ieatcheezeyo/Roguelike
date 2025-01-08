@@ -23,5 +23,11 @@ public:
 	Vector2 targetPosition;
 	float moveSpeed;
 	SDL_Texture* texture;
+
+private:
+	double holdTimer;
+	double holdDelay;
+	double repeatDelay;
+	bool isHolding;
 };
 

@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     int mapHeight = 720 / 16;
 
     Map map(mapWidth, mapHeight, screen.getRenderer());
-    map.generateDungeon();
+    map.generateDungeon(SDL_GetTicks64());
 
     player.findSpawnPoint(map.mapData);
 

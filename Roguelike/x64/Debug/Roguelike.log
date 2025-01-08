@@ -1,0 +1,11 @@
+﻿  Player.cpp
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(18,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(19,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(96,63): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(97,63): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+  RenderWindow.cpp
+  Roguelike.cpp
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(38,15): warning C4101: 'event': unreferenced local variable
+  Generating Code...
+  Roguelike.vcxproj -> C:\Users\toddd\OneDrive\Desktop\Roguelike\x64\Debug\Roguelike.exe
+  15 File(s) copied

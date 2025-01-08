@@ -1,12 +1,12 @@
 #include "Player.h"
 
-Player::Player(int x, int y, SDL_Texture* p_texture) : moveSpeed(15.0f) {
-	position = { x, y };
-	targetPosition = position;
-	texture = p_texture;
+Player::Player(int x, int y, SDL_Texture* p_texture)
+    : moveSpeed(15.0f), holdTimer(0.0), holdDelay(0.2), repeatDelay(0.1), isHolding(false) {
+    position = { x, y };
+    targetPosition = position;
+    texture = p_texture;
 
-	SDL_QueryTexture(p_texture, NULL, NULL, &w, &h);
-
+    SDL_QueryTexture(p_texture, NULL, NULL, &w, &h);
 }
 
 Player::~Player() {
@@ -47,22 +47,49 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
 void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, double dt) {
     Vector2 tilePos = { position.x / 16, position.y / 16 };
 
-    // Check if moving up doesn't go off the screen
-    if (pad.dpad_up && !pad.old_dpad_up && mapData[tilePos.y - 1][tilePos.x] == ' ') {
-        targetPosition.y -= h;
-    }
-    // Check if moving down doesn't go off the screen
-    else if (pad.dpad_down && !pad.old_dpad_down && mapData[tilePos.y + 1][tilePos.x] == ' ') {
-        targetPosition.y += h;
+    // Update the hold timer if a button is pressed
+    bool buttonPressed = pad.dpad_up || pad.dpad_down || pad.dpad_left || pad.dpad_right;
+    if (buttonPressed) {
+        holdTimer += dt;
+    } else {
+        holdTimer = 0.0;
+        isHolding = false;
     }
 
-    // Check if moving left doesn't go off the screen
-    if (pad.dpad_left && !pad.old_dpad_left && mapData[tilePos.y][tilePos.x - 1] == ' ') {
-        targetPosition.x -= w;
+    // Check for initial press or repeated movement
+    bool canMove = false;
+    if (pad.dpad_up && !pad.old_dpad_up) {
+        canMove = true;  // Initial press
+        isHolding = true;
+        holdTimer = 0.0;
+    } else if (pad.dpad_down && !pad.old_dpad_down) {
+        canMove = true;
+        isHolding = true;
+        holdTimer = 0.0;
+    } else if (pad.dpad_left && !pad.old_dpad_left) {
+        canMove = true;
+        isHolding = true;
+        holdTimer = 0.0;
+    } else if (pad.dpad_right && !pad.old_dpad_right) {
+        canMove = true;
+        isHolding = true;
+        holdTimer = 0.0;
+    } else if (isHolding && holdTimer >= holdDelay + repeatDelay) {
+        canMove = true;  // Holding and enough time has passed
+        holdTimer -= repeatDelay;  // Reset timer for next repeat
     }
-    // Check if moving right doesn't go off the screen
-    else if (pad.dpad_right && !pad.old_dpad_right && mapData[tilePos.y][tilePos.x + 1] == ' ') {
-        targetPosition.x += w;
+
+    // Move if allowed
+    if (canMove) {
+        if (pad.dpad_up && mapData[tilePos.y - 1][tilePos.x] == ' ') {
+            targetPosition.y -= h;
+        } else if (pad.dpad_down && mapData[tilePos.y + 1][tilePos.x] == ' ') {
+            targetPosition.y += h;
+        } else if (pad.dpad_left && mapData[tilePos.y][tilePos.x - 1] == ' ') {
+            targetPosition.x -= w;
+        } else if (pad.dpad_right && mapData[tilePos.y][tilePos.x + 1] == ' ') {
+            targetPosition.x += w;
+        }
     }
 
     // Move the player towards the target position
@@ -78,6 +105,7 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
         position.x = targetPosition.x;
     }
 }
+
 
 Vector2 Player::getPosition() {
 	return position;
