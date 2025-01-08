@@ -8,6 +8,11 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL2_gfxPrimitives.h>
+
+#include "Types.h"
+#include "Player.h"
+#include "Map.h"
 
 //////////////////////////////////////////////////////////////////
 // FILE   : RenderWindow Class
@@ -24,9 +29,21 @@ public:
 
 	SDL_Texture* loadTexture(const char* file);
 
+	void tick();
+
+	double dt() {
+		return deltaTime;
+	}
+
+	double getFPS() {
+		return fps;
+	}
+
 	void clear();
 
 	void blit(int x, int y, SDL_Texture* texture);
+	void blit(Map& map);
+	void blit(Player& player);
 
 	void print(int x, int y, const char* text);
 	void printf(int x, int y, const char* format, ...);
@@ -35,6 +52,7 @@ public:
 
 	int getScreenWidth();
 	int getScreenHeight();
+	SDL_Renderer* getRenderer();
 
 	void setBackgroundColor(Uint8 r, Uint8 g, Uint8 b);
 	void setFontColor(Uint8 r, Uint8 g, Uint8 b);
@@ -55,6 +73,12 @@ private:
 	TTF_Font* font;
 	int fontSize = 24;
 	SDL_Color fontColor;
+
+	//Timing
+	Uint64 previousTime;
+	Uint64 currentTime;
+	double deltaTime;
+	double fps;
 
 	// Private Functions
 	void clean();

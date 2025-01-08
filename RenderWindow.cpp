@@ -19,7 +19,13 @@ RenderWindow::RenderWindow(const char* title, int w, int h) {
 		std::cout << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
 	}
 
+	backgroundColor = { 0, 0, 0, 255 };
 	fontColor = { 255, 255, 255, 0 };
+
+	previousTime = 0;
+	currentTime = 0;
+	deltaTime = 0;
+	fps = 0;
 
 }
 
@@ -38,7 +44,28 @@ SDL_Texture* RenderWindow::loadTexture(const char* file) {
 	return textures.back();
 }
 
+void RenderWindow::tick() {
+	currentTime = SDL_GetPerformanceCounter();
+	Uint64 frequency = SDL_GetPerformanceFrequency();
+
+	if (previousTime == 0) {
+		previousTime = currentTime;
+	}
+
+	deltaTime = (double)(currentTime - previousTime) / (double)frequency;
+
+	if (deltaTime > 0) {
+		fps = 1.0 / deltaTime;
+	}
+	else {
+		fps = 0.0;
+	}
+
+	previousTime = currentTime;
+}
+
 void RenderWindow::clear() {
+	tick();
 	SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	SDL_RenderClear(renderer);
 }
@@ -51,6 +78,26 @@ void RenderWindow::blit(int x, int y, SDL_Texture* texture) {
 	SDL_QueryTexture(texture, NULL, NULL, &dst.w, &dst.h);
 
 	SDL_RenderCopy(renderer, texture, NULL, &dst);
+}
+
+void RenderWindow::blit(Map& map) {
+	for (size_t y = 0; y < map.mapData.size(); y++) {
+		for (size_t x = 0; x < map.mapData[y].size(); x++) {
+			char tileID = map.mapData[y][x];
+
+			for (Tile& tile : map.tiles) {
+				if (tile.symbol == tileID) {
+					SDL_Rect dst = { static_cast<int>(x * 16), static_cast<int>(y * 16), 16, 16 };
+					SDL_RenderCopy(renderer, tile.texture, NULL, &dst);
+				}
+			}
+		}
+	}
+}
+
+void RenderWindow::blit(Player& player) {
+	SDL_Rect dst = { player.position.x, player.position.y, player.w, player.h };
+	SDL_RenderCopy(renderer, player.texture, NULL, &dst);
 }
 
 void RenderWindow::print(int x, int y, const char* text) {
@@ -100,6 +147,10 @@ int RenderWindow::getScreenWidth() {
 
 int RenderWindow::getScreenHeight() {
 	return screen_h;
+}
+
+SDL_Renderer* RenderWindow::getRenderer() {
+	return renderer;
 }
 
 void RenderWindow::setBackgroundColor(Uint8 r, Uint8 g, Uint8 b) {
