@@ -11,7 +11,7 @@
 
 class Player {
 public:
-	Player(int x, int y, SDL_Texture* p_texture);
+	Player(int x, int y, int scale, SDL_Texture* p_texture);
 	~Player();
 
 	void update(std::vector<std::vector<char>> mapData, InputManager& pad, double dt);
@@ -24,10 +24,15 @@ public:
 	float moveSpeed;
 	SDL_Texture* texture;
 
+	int scale;
+
+	bool hasMoved();
+
 private:
 	double holdTimer;
 	double holdDelay;
 	double repeatDelay;
 	bool isHolding;
+	bool justMoved;
 };
 

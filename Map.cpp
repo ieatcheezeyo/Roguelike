@@ -1,12 +1,14 @@
 #include "Map.h"
 
-Map::Map(int w, int h, SDL_Renderer* renderer) : renderer(renderer), w(w), h(h) {
+Map::Map(int w, int h, int scale, SDL_Renderer* renderer) : items(renderer),  scale(scale), renderer(renderer), w(w), h(h) {
     mapData.resize(h, std::vector<char>(w, 'W'));
 
-    SDL_Texture* emptyTileTexture = loadTileTexture("Assets/Images/Empty_tile.png");
+    SDL_Texture* emptyTileTexture_01 = loadTileTexture("Assets/Images/Empty_tile_01.png");
+	SDL_Texture* emptyTileTexture_02 = loadTileTexture("Assets/Images/Empty_tile_02.png");
     SDL_Texture* wallTileTexture = loadTileTexture("Assets/Images/Wall_tile.png");
 
-    tiles.push_back(Tile(' ', emptyTileTexture));
+    tiles.push_back(Tile(' ', emptyTileTexture_01));
+	tiles.push_back(Tile('.', emptyTileTexture_02));
     tiles.push_back(Tile('W', wallTileTexture));
 
     std::srand(static_cast<unsigned int>(std::time(0)));
@@ -34,6 +36,9 @@ SDL_Texture* Map::loadTileTexture(const char* file) {
 }
 
 void Map::setTile(int x, int y, char symbol) {
+    x /= scale;
+	y /= scale;
+
     if (x < 0 || x >= mapData[0].size() || y < 0 || y >= mapData.size()) {
         std::cerr << "Error: setTile out of bounds (" << x << ", " << y << ")" << std::endl;
         return;
@@ -42,52 +47,55 @@ void Map::setTile(int x, int y, char symbol) {
 }
 
 char Map::getTileSymbol(int x, int y) const {
+	x /= scale;
+	y /= scale;
+    
     if (y >= 0 && y < mapData.size() && x >= 0 && x < mapData[y].size()) {
         return mapData[y][x];
     }
-    return '\0';  // Return a null character if out of bounds
+    return '\0';
 }
 
 int Map::floodFillAndCount(int startX, int startY) {
+    if (mapData[startY][startX] != ' ') {
+        return 0;
+    }
+
     int areaSize = 0;
     int nonWallCount = 0;
     std::queue<std::pair<int, int>> queue;
     queue.push({ startX, startY });
-    mapData[startY][startX] = 'A' + currentAreaID;
-
-    areaRegions.push_back(std::make_tuple(startX, startY, currentAreaID, nonWallCount));
-
-    if (mapData[startY][startX] == ' ') {
-        nonWallCount++;
-    }
+    int areaId = currentAreaID;
+    mapData[startY][startX] = areaId;
 
     while (!queue.empty()) {
-        std::pair<int, int> current = queue.front();
+        auto [x, y] = queue.front();
         queue.pop();
 
-        int x = current.first;
-        int y = current.second;
+        ++areaSize;
 
-        ++areaSize;  // Count the current cell as part of the area
-
-        // Explore all 4 directions (up, down, left, right)
         for (int dy = -1; dy <= 1; ++dy) {
             for (int dx = -1; dx <= 1; ++dx) {
-                if (dy == 0 && dx == 0) continue;  // Skip the current cell
+                if (std::abs(dy) == std::abs(dx)) continue;
                 int nx = x + dx, ny = y + dy;
                 if (nx >= 0 && nx < w && ny >= 0 && ny < h && mapData[ny][nx] == ' ') {
-                    mapData[ny][nx] = 'F';
+                    mapData[ny][nx] = areaId;
                     queue.push({ nx, ny });
-                    nonWallCount++;
+                    ++nonWallCount;
                 }
             }
         }
     }
 
-    areaRegions[currentAreaID - 1] = std::make_tuple(startX, startY, currentAreaID, nonWallCount);
+    areaRegions.push_back(std::make_tuple(startX, startY, areaId, nonWallCount));
+    
+
+    //std::cout << "Flood-filled area ID: " << areaId
+    //    << ", Size: " << areaSize
+    //    << ", Non-wall count: " << nonWallCount << std::endl;
 
     currentAreaID++;
-    return areaSize;  // Return the size of the connected area
+    return areaSize;
 }
 
 void Map::generateDungeon(Uint64 seed) {
@@ -100,42 +108,37 @@ void Map::generateDungeon(Uint64 seed) {
         }
     }
 
-    int centerX, centerY;
+    int centerX = (w / 2) / scale;
+    int centerY = (h / 2) / scale;
+    
     std::uniform_int_distribution<int> quadrantDist(0, 4);
 
     int quadrant = quadrantDist(rng);
 
     if (quadrant == 0) {
-        // Top-left quadrant
         centerX = w / 4 - 10;
         centerY = h / 4 - 10;
     } else if (quadrant == 1) {
-        // Top-right quadrant
         centerX = 3 * w / 4 - 10;
         centerY = h / 4 - 10;
     } else if (quadrant == 2) {
-        // Bottom-left quadrant
         centerX = w / 4 - 10;
         centerY = 3 * h / 4 - 10;
     } else if (quadrant == 3) {
-        // Bottom-right quadrant
         centerX = 3 * w / 4 - 10;
         centerY = 3 * h / 4 - 10;
     } else {
-        // Center of the map
         centerX = w / 2 - 10;
         centerY = h / 2 - 10;
     }
 
-    // Ensure the carving area is within bounds
-    centerX = std::max(0, std::min(centerX, w - 20));
-    centerY = std::max(0, std::min(centerY, h - 20));
+    centerX = std::max(0, std::min(centerX, w - 20 / scale));
+    centerY = std::max(0, std::min(centerY, h - 20 / scale));
 
-    // Step 4: Carve out a 20x20 empty space in the chosen area
-    for (int y = centerY; y < centerY + 20; ++y) {
-        for (int x = centerX; x < centerX + 20; ++x) {
+    for (int y = centerY; y < centerY + 20 / scale; ++y) {
+        for (int x = centerX; x < centerX + 20 / scale; ++x) {
             if (x >= 0 && x < w && y >= 0 && y < h) {
-                mapData[y][x] = ' ';  // Clear this area (empty space)
+                mapData[y][x] = ' ';
             }
         }
     }
@@ -181,12 +184,14 @@ void Map::generateDungeon(Uint64 seed) {
         for (int x = 0; x < mapData[0].size(); x++) {
             if (mapData[y][x] == ' ') {
                 floodFillAndCount(x, y);
-                //std::cout << floodFillAndCount(x, y) << std::endl;
             }
         }
     }
 
-    //removeSmallAreas();
+    removeSmallAreas();
+
+	connectAreas();
+    connectAreas();
 
     for (int y = 0; y < mapData.size(); y++) {
         for (int x = 0; x < mapData[0].size(); x++) {
@@ -195,6 +200,10 @@ void Map::generateDungeon(Uint64 seed) {
             }
         }
     }
+
+	randomizeGroundTiles();
+	spawnItems();
+
 }
 
 void Map::removeSmallAreas() {
@@ -205,7 +214,6 @@ void Map::removeSmallAreas() {
         std::cout << "Checking area ID: " << areaId
             << " with non-wall count: " << nonWallCount << std::endl;
 
-
         if (nonWallCount < 50) {
             std::cout << "Converting Area with ID " << areaId
                 << " at (" << areaX << ", " << areaY
@@ -213,7 +221,7 @@ void Map::removeSmallAreas() {
 
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    if (mapData[y][x] == 'A' + areaId - 1) {
+                    if (mapData[y][x] == areaId) {
                         mapData[y][x] = 'W';
                     }
                 }
@@ -222,6 +230,81 @@ void Map::removeSmallAreas() {
             it = areaRegions.erase(it);
         } else {
             ++it;
+        }
+    }
+}
+
+void Map::connectAreas() {
+    std::vector<std::pair<int, int>> centroids;
+    for (const auto& region : areaRegions) {
+        int areaX, areaY, areaId, nonWallCount;
+        std::tie(areaX, areaY, areaId, nonWallCount) = region;
+        centroids.push_back({ areaX, areaY });
+    }
+
+    std::sort(centroids.begin(), centroids.end());
+
+    for (size_t i = 0; i < centroids.size() - 1; ++i) {
+        auto [x1, y1] = centroids[i];
+        auto [x2, y2] = centroids[i + 1];
+
+        carvePath(x1, y1, x2, y2);
+    }
+}
+
+void Map::carvePath(int x1, int y1, int x2, int y2) {
+    int x = x1, y = y1;
+
+    x1 /= scale;
+	x2 /= scale;
+	y1 /= scale;
+	y2 /= scale;
+
+    while (x != x2) {
+        mapData[y][x] = ' ';
+        x += (x2 > x) ? 1 : -1;
+    }
+
+    while (y != y2) {
+        mapData[y][x] = ' ';
+        y += (y2 > y) ? 1 : -1;
+    }
+}
+
+void Map::randomizeGroundTiles() {
+	for (int y = 0; y < h; ++y) {
+		for (int x = 0; x < w; ++x) {
+			if (mapData[y][x] == ' ') {
+				mapData[y][x] = (rand() % 2 == 0) ? '.' : ' ';
+			}
+		}
+	}
+}
+
+void Map::spawnItems() {
+    int maxItems = 10;
+    int itemCount = 0;
+
+    while (itemCount < maxItems) {
+        int x = std::rand() % w;
+        int y = std::rand() % h;
+
+        if (mapData[y][x] == ' ') {
+            int worldX = (x * 16) * scale;
+            int worldY = (y * 16) * scale;
+
+			int r = std::rand() % 2;
+
+            switch (r) {
+            case 0:
+				items.createItem(worldX, worldY, scale, "Coin");
+				break;
+			case 1:
+				items.createItem(worldX, worldY, scale, "HealthPotion");
+                break;
+            }
+			++itemCount;
+
         }
     }
 }

@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\mvs_lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,6 +135,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Items.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderWindow.cpp" />
@@ -142,6 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="Items.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RenderWindow.h" />

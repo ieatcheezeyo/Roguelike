@@ -1,12 +1,16 @@
 #include "Player.h"
 
-Player::Player(int x, int y, SDL_Texture* p_texture)
-    : moveSpeed(15.0f), holdTimer(0.0), holdDelay(0.2), repeatDelay(0.1), isHolding(false) {
+Player::Player(int x, int y, int scale, SDL_Texture* p_texture)
+    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false) {
     position = { x, y };
     targetPosition = position;
     texture = p_texture;
 
     SDL_QueryTexture(p_texture, NULL, NULL, &w, &h);
+
+	w *= scale;
+	h *= scale;
+
 }
 
 Player::~Player() {
@@ -29,10 +33,10 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
                 mapData[y][x + 1] == ' ')   // Check right
             {
                 // Set the player's spawn position to this valid point
-                position.x = x * 16;  // Assuming each tile is 16x16 pixels
-                position.y = y * 16;
-                targetPosition.x = x * 16;
-                targetPosition.y = y * 16;
+                position.x = x * 16 * scale;  // Assuming each tile is 16x16 pixels
+                position.y = y * 16 * scale;
+                targetPosition.x = x * 16 * scale;
+                targetPosition.y = y * 16 * scale;
                 return;  // Stop searching once a valid spawn point is found
             }
         }
@@ -42,12 +46,16 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
     std::cout << "No valid spawn point found, spawning at (0, 0)" << std::endl;
     position.x = 0;
     position.y = 0;
+	targetPosition.x = 0;
+	targetPosition.y = 0;
 }
 
 void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, double dt) {
-    Vector2 tilePos = { position.x / 16, position.y / 16 };
+    justMoved = false;
+    Vector2 tilePos = { position.x / (16 * scale), position.y / (16 * scale) };
 
-    // Update the hold timer if a button is pressed
+    Vector2 previousPosition = position;
+
     bool buttonPressed = pad.dpad_up || pad.dpad_down || pad.dpad_left || pad.dpad_right;
     if (buttonPressed) {
         holdTimer += dt;
@@ -56,10 +64,9 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
         isHolding = false;
     }
 
-    // Check for initial press or repeated movement
     bool canMove = false;
     if (pad.dpad_up && !pad.old_dpad_up) {
-        canMove = true;  // Initial press
+        canMove = true;
         isHolding = true;
         holdTimer = 0.0;
     } else if (pad.dpad_down && !pad.old_dpad_down) {
@@ -75,28 +82,25 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
         isHolding = true;
         holdTimer = 0.0;
     } else if (isHolding && holdTimer >= holdDelay + repeatDelay) {
-        canMove = true;  // Holding and enough time has passed
-        holdTimer -= repeatDelay;  // Reset timer for next repeat
+        canMove = true;
+        holdTimer -= repeatDelay;
     }
 
-    // Move if allowed
     if (canMove) {
-        if (pad.dpad_up && mapData[tilePos.y - 1][tilePos.x] == ' ') {
-            targetPosition.y -= h;
-        } else if (pad.dpad_down && mapData[tilePos.y + 1][tilePos.x] == ' ') {
-            targetPosition.y += h;
-        } else if (pad.dpad_left && mapData[tilePos.y][tilePos.x - 1] == ' ') {
-            targetPosition.x -= w;
-        } else if (pad.dpad_right && mapData[tilePos.y][tilePos.x + 1] == ' ') {
-            targetPosition.x += w;
+        if (pad.dpad_up && mapData[tilePos.y - 1][tilePos.x] != 'W') {
+            targetPosition.y -= 16 * scale;
+        } else if (pad.dpad_down && mapData[tilePos.y + 1][tilePos.x] != 'W') {
+            targetPosition.y += 16 * scale;
+        } else if (pad.dpad_left && mapData[tilePos.y][tilePos.x - 1] != 'W') {
+            targetPosition.x -= 16 * scale;
+        } else if (pad.dpad_right && mapData[tilePos.y][tilePos.x + 1] != 'W') {
+            targetPosition.x += 16 * scale;
         }
     }
 
-    // Move the player towards the target position
     position.x += (targetPosition.x - position.x) * moveSpeed * dt;
     position.y += (targetPosition.y - position.y) * moveSpeed * dt;
 
-    // Prevent overshooting the target position
     if (std::abs(position.y - targetPosition.y) < 0.5f * h) {
         position.y = targetPosition.y;
     }
@@ -104,9 +108,27 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
     if (std::abs(position.x - targetPosition.x) < 0.5f * w) {
         position.x = targetPosition.x;
     }
+
+    if (position.x == targetPosition.x && position.y == targetPosition.y) {
+        if (previousPosition.x != position.x || previousPosition.y != position.y) {
+            justMoved = true;
+        }
+    }
+
+    if (position.x != targetPosition.x || position.y != targetPosition.y) {
+        justMoved = false;
+    }
+
 }
 
+bool Player::hasMoved() {
+    if (justMoved) {
+        justMoved = false;
+        return true;
+    }
+    return false;
+}
 
 Vector2 Player::getPosition() {
-	return position;
+    return { position.x / scale, position.y / scale };
 }
