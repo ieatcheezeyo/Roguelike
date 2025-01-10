@@ -29,6 +29,7 @@ public:
 	bool hasMoved();
 
 private:
+	std::vector<char> walkableTiles = { ' ', '.' };
 	double holdTimer;
 	double holdDelay;
 	double repeatDelay;

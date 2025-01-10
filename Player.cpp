@@ -87,14 +87,17 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
     }
 
     if (canMove) {
-        if (pad.dpad_up && mapData[tilePos.y - 1][tilePos.x] != 'W') {
-            targetPosition.y -= 16 * scale;
-        } else if (pad.dpad_down && mapData[tilePos.y + 1][tilePos.x] != 'W') {
-            targetPosition.y += 16 * scale;
-        } else if (pad.dpad_left && mapData[tilePos.y][tilePos.x - 1] != 'W') {
-            targetPosition.x -= 16 * scale;
-        } else if (pad.dpad_right && mapData[tilePos.y][tilePos.x + 1] != 'W') {
-            targetPosition.x += 16 * scale;
+		for (auto& tile : walkableTiles) {
+		
+            if (pad.dpad_up && mapData[tilePos.y - 1][tilePos.x] == tile) {
+                targetPosition.y -= 16 * scale;
+            } else if (pad.dpad_down && mapData[tilePos.y + 1][tilePos.x] == tile) {
+                targetPosition.y += 16 * scale;
+            } else if (pad.dpad_left && mapData[tilePos.y][tilePos.x - 1] == tile) {
+                targetPosition.x -= 16 * scale;
+            } else if (pad.dpad_right && mapData[tilePos.y][tilePos.x + 1] == tile) {
+                targetPosition.x += 16 * scale;
+            }
         }
     }
 
@@ -130,5 +133,5 @@ bool Player::hasMoved() {
 }
 
 Vector2 Player::getPosition() {
-    return { position.x / scale, position.y / scale };
+    return { position.x * scale / 16, position.y * scale / 16 };
 }

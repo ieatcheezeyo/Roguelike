@@ -6,6 +6,9 @@
 #include <random>
 #include <queue>
 #include <tuple>
+#include <unordered_map>
+#include <bitset>
+#include <fstream>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -23,8 +26,11 @@ public:
 	void generateDungeon(Uint64 seed);
 	int floodFillAndCount(int startX, int startY);
 	void removeSmallAreas();
+	void fillEdges();
+	void drunkardsWalk(int x1, int y1, int x2, int y2);
 	void connectAreas();
 	void carvePath(int x1, int y1, int x2, int y2);
+	void applyBitmasking();
 
 	std::vector<SDL_Texture*> textures;
 	std::vector<Tile> tiles;
