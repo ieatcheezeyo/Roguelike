@@ -10,7 +10,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-#define SCALE 1
+#define SCALE 3
 
 int main(int argc, char* argv[]) {
 
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     Player player(0, 0, SCALE, playerTexture);
 
     Map map(mapWidth, mapHeight, SCALE, screen.getRenderer());
-    map.generateDungeon(101101);//SDL_GetTicks64());
+    map.generateDungeon(SDL_GetTicks64() * 64);
 
     player.findSpawnPoint(map.mapData);
 

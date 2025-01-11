@@ -66,8 +66,6 @@ Map::Map(int w, int h, int scale, SDL_Renderer* renderer) : items(renderer),  sc
 
 	tiles.push_back(Tile('Z', surroundedTileTexture));
 
-
-    //std::srand(static_cast<unsigned int>(std::time(0)));
 }
 
 Map::~Map() {
@@ -258,6 +256,7 @@ void Map::generateDungeon(Uint64 seed) {
 
 	randomizeGroundTiles();
 	applyBitmasking();
+    fillEdges();
 	spawnItems();
 
 }
@@ -267,13 +266,13 @@ void Map::removeSmallAreas() {
         int areaX, areaY, areaId, nonWallCount;
         std::tie(areaX, areaY, areaId, nonWallCount) = *it;
 
-        std::cout << "Checking area ID: " << areaId
-            << " with non-wall count: " << nonWallCount << std::endl;
+        //std::cout << "Checking area ID: " << areaId
+        //    << " with non-wall count: " << nonWallCount << std::endl;
 
         if (nonWallCount < 50) {
-            std::cout << "Converting Area with ID " << areaId
-                << " at (" << areaX << ", " << areaY
-                << ") to walls due to " << nonWallCount << " empty tiles." << std::endl;
+            //std::cout << "Converting Area with ID " << areaId
+            //    << " at (" << areaX << ", " << areaY
+            //    << ") to walls due to " << nonWallCount << " empty tiles." << std::endl;
 
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
@@ -346,12 +345,12 @@ void Map::drunkardsWalk(int x1, int y1, int x2, int y2) {
 void Map::fillEdges() {
     // Fill edges with walls
     for (int x = 0; x < w; ++x) {
-        mapData[0][x] = 'W';               // Top edge
-        mapData[h - 1][x] = 'W';   // Bottom edge
+        mapData[0][x] = 'Z';               // Top edge
+        mapData[h - 1][x] = 'Z';   // Bottom edge
     }
     for (int y = 0; y < h; ++y) {
-        mapData[y][0] = 'W';               // Left edge
-        mapData[y][w - 1] = 'W';    // Right edge
+        mapData[y][0] = 'Z';               // Left edge
+        mapData[y][w - 1] = 'Z';    // Right edge
     }
 }
 
@@ -410,40 +409,110 @@ void Map::applyBitmasking() {
     // Updated bitmask-to-tile map
     std::unordered_map<int, char> bitmaskToTile = {
         {0b00000000, 'A'}, // Isolated single wall
+        {0b00001000, 'A'},
+        {0b00001010, 'A'},
+        {0b00100010, 'A'},
         {0b00000010, 'A'},
         {0b10000000, 'A'},
         {0b00100000, 'A'},
+        {0b10001000, 'A'},
         {0b00000001, 'B'}, // Vertical wall top
         {0b00000011, 'B'},
+        {0b10100001, 'B'},
+        {0b00001011, 'B'},
+        {0b10001011, 'B'},
+        {0b10100011, 'B'},
+        {0b10000011, 'B'},
+        {0b10001001, 'B'},
+        {0b00001001, 'B'},
+        {0b10000001, 'B'},
+        {0b00100011, 'B'},
         {0b00100001, 'B'},
         {0b00010010, 'B'},
-        {0b10000011, 'B'},
         {0b00011000, 'C'}, // Vertical wall bottom
         {0b00110000, 'C'},
+        {0b10111000, 'C'},
+        {0b00011010, 'C'},
+        {0b00111010, 'C'},
+        {0b10011000, 'C'},
+        {0b00110010, 'C'},
+        {0b10110000, 'C'},
+        {0b10010000, 'C'},
         {0b00010000, 'C'},
         {0b00111000, 'C'},
         {0b00010001, 'D'}, // Vertical wall top and bottom
+        {0b00111011, 'D'},
+        {0b00011011, 'D'},
+        {0b10110011, 'D'},
+        {0b00010011, 'D'},
+        {0b10111001, 'D'},
+        {0b10010011, 'D'},
+        {0b00011001, 'D'},
+        {0b00110011, 'D'},
         {0b00110001, 'D'},
+        {0b00111001, 'D'},
+        {0b10110001, 'D'},
         {0b10010001, 'D'},
         {0b10011001, 'D'},
         {0b00000100, 'E'}, // Horizontal wall right
+        {0b00101100, 'E'},
+        {0b10001110, 'E'},
+        {0b10000110, 'E'},
+        {0b10001100, 'E'},
+        {0b00100100, 'E'},
+        {0b00101110, 'E'},
+        {0b10000100, 'E'},
         {0b00001100, 'E'},
+        {0b00100110, 'E'},
         {0b00000110, 'E'},
         {0b00001110, 'E'},
         {0b01000000, 'F'}, // Horizontal wall left
+        {0b11100010, 'F'},
+        {0b01001010, 'F'},
+        {0b11101000, 'F'},
+        {0b01101000, 'F'},
+        {0b01000010, 'F'},
+        {0b11000010, 'F'},
+        {0b11001000, 'F'},
+        {0b01100010, 'F'},
+        {0b11000000, 'F'},
         {0b01100000, 'F'},
+        {0b11100000, 'F'},
         {0b01001000, 'F'},
         {0b00000101, 'G'}, // Horizontal wall right and left
+        {0b01000110, 'G'},
+        {0b01101110, 'G'},
+        {0b11001110, 'G'},
+        {0b11101100, 'G'},
+        {0b11000110, 'G'},
+        {0b01100110, 'G'},
+        {0b01001110, 'G'},
+        {0b01101100, 'G'},
+        {0b01001100, 'G'},
+        {0b01000100, 'G'},
+        {0b11000100, 'G'},
+        {0b11100110, 'G'},
         {0b11100100, 'G'},
+        {0b01100100, 'G'},
         {0b11001100, 'G'},
         {0b01010000, 'H'}, // Corner left-bottom
         {0b11010000, 'H'},
+        {0b01010010, 'H'},
+        {0b01110010, 'H'},
+        {0b11110010, 'H'},
+        {0b01011000, 'H'},
+        {0b11011000, 'H'},
+        {0b01111010, 'H'},
         {0b11110000, 'H'},
         {0b01111000, 'H'},
         {0b11111000, 'H'},
         {0b01110000, 'H'},
         {0b00010100, 'I'}, // Corner right-bottom
-        {0b01110011, 'I'},
+        {0b00010110, 'I'},
+        {0b10111100, 'I'},
+        {0b10111110, 'I'},
+        {0b10011110, 'I'},
+        {0b10011100, 'I'},
         {0b00011100, 'I'},
         {0b00110110, 'I'},
         {0b00110100, 'I'},
@@ -451,18 +520,40 @@ void Map::applyBitmasking() {
         {0b00011110, 'I'},
         {0b00111100, 'I'},
         {0b10001111, 'J'}, // Corner top-right
+        {0b00101111, 'J'},
+        {0b00100101, 'J'},
+        {0b10001101, 'J'},
         {0b00001101, 'J'},
+        {0b10000101, 'J'},
+        {0b10101111, 'J'},
         {0b00001111, 'J'},
         {0b00100111, 'J'},
         {0b10100111, 'J'},
         {0b00000111, 'J'},
         {0b10000111, 'J'},
         {0b11100011, 'K'}, // Corner top-left
+        {0b01000011, 'K'},
+        {0b01001001, 'K'},
+        {0b01001011, 'K'},
+        {0b11101011, 'K'},
+        {0b11001011, 'K'},
+        {0b11001001, 'K'},
+        {0b01000001, 'K'},
         {0b01100011, 'K'},
+        {0b11101001, 'K'},
+        {0b01100001, 'K'},
         {0b11000001, 'K'},
         {0b11100001, 'K'},
         {0b11000011, 'K'},
         {0b01000101, 'L'}, // WallRightLeftAndBottom
+        {0b11010110, 'L'},
+        {0b11010100, 'L'},
+        {0b11011110, 'L'},
+        {0b01010110, 'L'},
+        {0b11110110, 'L'},
+        {0b01010100, 'L'},
+        {0b11011100, 'L'},
+        {0b11110100, 'L'},
         {0b11111110, 'L'},
         {0b01011100, 'L'},
         {0b01011110, 'L'},
@@ -473,23 +564,49 @@ void Map::applyBitmasking() {
         {0b01111100, 'L'},
         {0b11101111, 'M'}, // WallRightLeftAndTop
         {0b01001111, 'M'},
-        {0b10111111, 'M'},
+        {0b01001101, 'M'},
+        {0b01001101, 'M'},
+        {0b01100101, 'M'},
+        {0b01101111, 'M'},
+        {0b11000101, 'M'},
+        {0b11101101, 'M'},
+        {0b01000111, 'M'},
+        {0b01101101, 'M'},
+        {0b11001101, 'M'},
         {0b11100101, 'M'},
         {0b01100111, 'M'},
         {0b11001111, 'M'},
         {0b11100111, 'M'},
         {0b11000111, 'M'},
         {0b00011111, 'N'}, // WallRightTopAndBottom
+        {0b10011101, 'N'},
+        {0b10010101, 'N'},
+        {0b10110111, 'N'},
+        {0b10111101, 'N'},
+        {0b00110101, 'N'},
+        {0b00010101, 'N'},
+        {0b00111101, 'N'},
         {0b10010111, 'N'},
-        {0b10011111, 'N'},
+        {0b10111111, 'N'},
+        {0b00010111, 'N'},
         {0b00110111, 'N'},
+        {0b00011101, 'N'},
+        {0b10011111, 'N'},
         {0b00111111, 'N'},
         {0b11110011, 'O'}, // WallLeftTopAndBottom
+        {0b01010011, 'O'},
+        {0b11010011, 'O'},
+        {0b01010001, 'O'},
         {0b01111011, 'O'},
+        {0b11011011, 'O'},
+        {0b01011001, 'O'},
+        {0b01111001, 'O'},
+        {0b01110011, 'O'},
         {0b11011001, 'O'},
         {0b11010001, 'O'},
         {0b01110001, 'O'},
         {0b11111001, 'O'},
+        {0b11111011, 'O'},
         {0b11110001, 'O'},
         {0b11110111, 'P'}, //InnerCornerRightandBottom
 		{0b11011111, 'Q'}, //InnerCornerLeftandBottom
@@ -498,6 +615,19 @@ void Map::applyBitmasking() {
 		{0b01111111, 'S'}, //InnerCornerRightandTop
         
         {0b11111111, 'Z'}, // Fully surrounded by walls
+
+        //Come Back To Fix Theese
+        {0b11110101, 'Z'},
+        {0b11011101, 'Z'},
+        {0b11010111, 'Z'},
+        {0b01011111, 'Z'},
+        {0b01111101, 'Z'},
+        {0b01110111, 'Z'},
+        {0b01110101, 'Z'},
+        {0b01010111, 'Z'},
+        {0b01011101, 'Z'},
+        {0b11010101, 'Z'},
+        {0b01010101, 'Z'},
     };
 
     std::vector<std::vector<char>> newMap = mapData;
