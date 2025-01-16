@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
         //screen.printf(10, 5, "%s, %i, %i", itemsManager.items[0]->name.c_str(), itemsManager.items[0]->x / 16, itemsManager.items[0]->y / 16);
         //screen.printf(10, 5, "DT: %.3f", screen.dt());
         screen.printf(10, 25, "FPS: %.2f", screen.getFPS());
-        screen.printf(10, 55, "Player Position: X(%i),Y(%i)", player.position.x / 16, player.position.y / 16);
+        screen.printf(10, 55, "Player Position: X(%i),Y(%i)", (player.position.x / SCALE) / 16, (player.position.y / SCALE) / 16);
 
 		//screen.setDrawColor(255, 255, 255);
 		//screen.drawRect("line", player.position.x, player.position.y, 32, 32);

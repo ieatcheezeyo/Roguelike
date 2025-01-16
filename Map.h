@@ -36,7 +36,8 @@ public:
 	std::vector<Tile> tiles;
 	std::vector<std::vector<char>> mapData;
 	std::vector<std::tuple<int, int, int, int>> areaRegions;
-	int currentAreaID = 1;
+	std::vector<std::vector<bool>> visited;
+	int currentAreaID;
 
 	int scale;
 

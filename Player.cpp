@@ -22,27 +22,23 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
     int numRows = mapData.size();
     int numCols = mapData[0].size();
 
-    // Try to find a spawn point by scanning the map.
-    for (int y = 1; y < numRows - 1; y++) {  // Avoid edges to prevent out-of-bounds
+    for (int y = 1; y < numRows - 1; y++) {
         for (int x = 1; x < numCols - 1; x++) {
-            // Check if the current tile is an empty space and surrounded by walls
             if (mapData[y][x] == ' ' &&
-                mapData[y - 1][x] == ' ' && // Check top
-                mapData[y + 1][x] == ' ' && // Check bottom
-                mapData[y][x - 1] == ' ' && // Check left
-                mapData[y][x + 1] == ' ')   // Check right
+                mapData[y - 1][x] == ' ' &&
+                mapData[y + 1][x] == ' ' &&
+                mapData[y][x - 1] == ' ' &&
+                mapData[y][x + 1] == ' ')
             {
-                // Set the player's spawn position to this valid point
-                position.x = x * 16 * scale;  // Assuming each tile is 16x16 pixels
+                position.x = x * 16 * scale;
                 position.y = y * 16 * scale;
                 targetPosition.x = x * 16 * scale;
                 targetPosition.y = y * 16 * scale;
-                return;  // Stop searching once a valid spawn point is found
+                return;
             }
         }
     }
 
-    // If no spawn point was found, you might want to handle it, e.g., by spawning the player at (0, 0)
     std::cout << "No valid spawn point found, spawning at (0, 0)" << std::endl;
     position.x = 0;
     position.y = 0;

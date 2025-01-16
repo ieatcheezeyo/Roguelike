@@ -1,6 +1,6 @@
 #include "Map.h"
 
-Map::Map(int w, int h, int scale, SDL_Renderer* renderer) : items(renderer),  scale(scale), renderer(renderer), w(w), h(h) {
+Map::Map(int w, int h, int scale, SDL_Renderer* renderer) : visited(h, std::vector<bool>(w, false)), currentAreaID(1), items(renderer),  scale(scale), renderer(renderer), w(w), h(h) {
     mapData.resize(h, std::vector<char>(w, 'W'));
 
     SDL_Texture* emptyTileTexture_01 = loadTileTexture("Assets/Images/Empty_tile_01.png");
@@ -111,8 +111,9 @@ char Map::getTileSymbol(int x, int y) const {
 }
 
 int Map::floodFillAndCount(int startX, int startY) {
-    if (mapData[startY][startX] != ' ') {
-        return 0;
+    // Check if the tile is already visited or not an empty space
+    if (visited[startY][startX] || mapData[startY][startX] != ' ') {
+        return 0; // Already visited or not an empty space
     }
 
     int areaSize = 0;
@@ -120,7 +121,11 @@ int Map::floodFillAndCount(int startX, int startY) {
     std::queue<std::pair<int, int>> queue;
     queue.push({ startX, startY });
     int areaId = currentAreaID;
-    mapData[startY][startX] = areaId;
+
+    mapData[startY][startX] = areaId; // Mark the starting tile
+    visited[startY][startX] = true;  // Mark as visited in the visited array
+
+    //std::cout << "Starting flood fill with areaId: " << areaId << " at (" << startX << ", " << startY << ")" << std::endl;
 
     while (!queue.empty()) {
         auto [x, y] = queue.front();
@@ -128,24 +133,36 @@ int Map::floodFillAndCount(int startX, int startY) {
 
         ++areaSize;
 
-        for (int dy = -1; dy <= 1; ++dy) {
-            for (int dx = -1; dx <= 1; ++dx) {
-                if (std::abs(dy) == std::abs(dx)) continue;
-                int nx = x + dx, ny = y + dy;
-                if (nx >= 0 && nx < w && ny >= 0 && ny < h && mapData[ny][nx] == ' ') {
-                    mapData[ny][nx] = areaId;
-                    queue.push({ nx, ny });
-                    ++nonWallCount;
-                }
+        // Visit all 4 neighbors (N, S, E, W)
+        const int directions[4][2] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+        for (const auto& [dx, dy] : directions) {
+            int nx = x + dx, ny = y + dy;
+
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && mapData[ny][nx] == ' ' && !visited[ny][nx]) {
+                // Mark the tile as visited
+                mapData[ny][nx] = areaId;
+                visited[ny][nx] = true;  // Update the visited array
+
+                queue.push({ nx, ny });
+                ++nonWallCount;
             }
         }
     }
 
+    // Handle single-tile regions explicitly
+    if (areaSize == 1) {
+        //std::cout << "Single-tile region at (" << startX << ", " << startY << ")\n";
+    }
+
+    // Store region information
     areaRegions.push_back(std::make_tuple(startX, startY, areaId, nonWallCount));
 
+    // Increment global area ID
     currentAreaID++;
+
     return areaSize;
 }
+
 
 void Map::generateDungeon(Uint64 seed) {
 
@@ -235,19 +252,23 @@ void Map::generateDungeon(Uint64 seed) {
     for (int y = 0; y < mapData.size(); y++) {
         for (int x = 0; x < mapData[0].size(); x++) {
             if (mapData[y][x] == ' ') {
-                floodFillAndCount(x, y);
+                //floodFillAndCount(x, y);
+                int areaSize = floodFillAndCount(x, y);
+                if (areaSize > 0) {
+                    //std::cout << "Region Starting at (" << x << ", " << y << ") has size: " << areaSize << std::endl;
+                }
             }
         }
     }
 
+    fillEdges();
     removeSmallAreas();
-
 	connectAreas();
     
-    removeSmallAreas();
+    //removeSmallAreas();
 
-    for (int y = 0; y < mapData.size(); y++) {
-        for (int x = 0; x < mapData[0].size(); x++) {
+    for (int y = 1; y < mapData.size() - 1; y++) {
+        for (int x = 1; x < mapData[0].size() - 1; x++) {
             if (mapData[y][x] != 'W') {
                 mapData[y][x] = ' ';
             }
@@ -256,7 +277,6 @@ void Map::generateDungeon(Uint64 seed) {
 
 	randomizeGroundTiles();
 	applyBitmasking();
-    fillEdges();
 	spawnItems();
 
 }
@@ -345,18 +365,16 @@ void Map::drunkardsWalk(int x1, int y1, int x2, int y2) {
 void Map::fillEdges() {
     // Fill edges with walls
     for (int x = 0; x < w; ++x) {
-        mapData[0][x] = 'Z';               // Top edge
-        mapData[h - 1][x] = 'Z';   // Bottom edge
+        mapData[0][x] = 'W';               // Top edge
+        mapData[h - 1][x] = 'W';   // Bottom edge
     }
     for (int y = 0; y < h; ++y) {
-        mapData[y][0] = 'Z';               // Left edge
-        mapData[y][w - 1] = 'Z';    // Right edge
+        mapData[y][0] = 'W';               // Left edge
+        mapData[y][w - 1] = 'W';    // Right edge
     }
 }
 
 void Map::connectAreas() {
-    fillEdges();
-
     std::vector<std::pair<int, int>> centroids;
     for (const auto& region : areaRegions) {
         int areaX, areaY, areaId, nonWallCount;
@@ -404,7 +422,7 @@ void Map::randomizeGroundTiles() {
 }
 
 void Map::applyBitmasking() {
-    std::cout << "Applying Bitmasking..." << std::endl;
+    //std::cout << "Applying Bitmasking..." << std::endl;
 
     // Updated bitmask-to-tile map
     std::unordered_map<int, char> bitmaskToTile = {
@@ -479,8 +497,8 @@ void Map::applyBitmasking() {
         {0b01100000, 'F'},
         {0b11100000, 'F'},
         {0b01001000, 'F'},
-        {0b00000101, 'G'}, // Horizontal wall right and left
-        {0b01000110, 'G'},
+        //{0b00000101, 'G'}, 
+        {0b01000110, 'G'}, // Horizontal wall right and left
         {0b01101110, 'G'},
         {0b11001110, 'G'},
         {0b11101100, 'G'},
@@ -526,6 +544,7 @@ void Map::applyBitmasking() {
         {0b00001101, 'J'},
         {0b10000101, 'J'},
         {0b10101111, 'J'},
+        {0b00000101, 'J'},
         {0b00001111, 'J'},
         {0b00100111, 'J'},
         {0b10100111, 'J'},
@@ -632,36 +651,36 @@ void Map::applyBitmasking() {
 
     std::vector<std::vector<char>> newMap = mapData;
 
-    for (int y = 1; y < h - 1; ++y) {
-        for (int x = 1; x < w - 1; ++x) {
+    //for (const auto& pair : bitmaskToTile) {
+    //    std::cout << "Bitmask: " << std::bitset<8>(pair.first)
+    //        << " -> Tile: " << pair.second << std::endl;
+    //}
+
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
             if (mapData[y][x] != 'W') continue; // Skip non-wall tiles
 
             int bitmask = 0;
 
-            // Calculate the bitmask for the current tile
-            bitmask |= (mapData[y - 1][x] == 'W') ? 1 : 0;       // North
-            bitmask |= (mapData[y - 1][x + 1] == 'W') ? 2 : 0;   // North-East
-            bitmask |= (mapData[y][x + 1] == 'W') ? 4 : 0;       // East
-            bitmask |= (mapData[y + 1][x + 1] == 'W') ? 8 : 0;   // South-East
-            bitmask |= (mapData[y + 1][x] == 'W') ? 16 : 0;      // South
-            bitmask |= (mapData[y + 1][x - 1] == 'W') ? 32 : 0;  // South-West
-            bitmask |= (mapData[y][x - 1] == 'W') ? 64 : 0;      // West
-            bitmask |= (mapData[y - 1][x - 1] == 'W') ? 128 : 0; // North-West
+            auto isWall = [&](int ny, int nx) {
+                // Return false for out-of-bounds access
+                if (ny < 0 || ny >= h || nx < 0 || nx >= w) return false;
+                return mapData[ny][nx] == 'W';
+            };
 
-            // Debugging output for unmatched cases
-            //if (bitmaskToTile.find(bitmask) == bitmaskToTile.end()) {
-            //    std::cout << "Unmatched bitmask: " << std::bitset<8>(bitmask)
-            //        << " at (" << x << ", " << y << ")" << std::endl;
+            // Generate the bitmask with safe neighbor checks
+            bitmask |= isWall(y - 1, x) ? 1 : 0;           // North
+            bitmask |= isWall(y - 1, x + 1) ? 2 : 0;       // NE
+            bitmask |= isWall(y, x + 1) ? 4 : 0;           // East
+            bitmask |= isWall(y + 1, x + 1) ? 8 : 0;       // SE
+            bitmask |= isWall(y + 1, x) ? 16 : 0;          // South
+            bitmask |= isWall(y + 1, x - 1) ? 32 : 0;      // SW
+            bitmask |= isWall(y, x - 1) ? 64 : 0;          // West
+            bitmask |= isWall(y - 1, x - 1) ? 128 : 0;     // NW
 
-                // Print neighboring tiles for context
-                //std::cout << "Neighbors:\n";
-                //for (int i = -1; i <= 1; ++i) {
-                //    for (int j = -1; j <= 1; ++j) {
-                //        std::cout << mapData[y + i][x + j] << " ";
-                //    }
-                //    std::cout << std::endl;
-                //}
-            //}
+            //std::cout << "Bitmask for tile (" << x << ", " << y << "): "
+            //    << std::bitset<8>(bitmask) << std::endl;
+
 
             if (bitmaskToTile.find(bitmask) == bitmaskToTile.end()) {
                 std::ofstream logFile("unmatched_bitmasks.log", std::ios::app);
@@ -670,17 +689,21 @@ void Map::applyBitmasking() {
                 logFile << "Neighbors:\n";
                 for (int i = -1; i <= 1; ++i) {
                     for (int j = -1; j <= 1; ++j) {
-                        logFile << mapData[y + i][x + j] << " ";
+                        if (y + i >= 0 && y + i < h && x + j >= 0 && x + j < w) {
+                            logFile << mapData[y + i][x + j] << " ";
+                        } else {
+                            logFile << "X "; // Out-of-bounds indicator
+                        }
                     }
                     logFile << "\n";
                 }
                 logFile.close();
+
             }
 
-            // Assign to new map based on bitmask
             newMap[y][x] = (bitmaskToTile.find(bitmask) != bitmaskToTile.end())
                 ? bitmaskToTile[bitmask]
-                : 'W'; // Default wall tile
+                : 'W'; // Default to wall if unmatched
         }
     }
 
@@ -694,7 +717,6 @@ void Map::applyBitmasking() {
     //    std::cout << std::endl;
     //}
 }
-
 
 void Map::spawnItems() {
     int maxItems = 10;
