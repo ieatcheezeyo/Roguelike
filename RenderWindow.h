@@ -63,6 +63,7 @@ public:
 
 	void blit(int x, int y, SDL_Texture* texture);
 	void blit(Map& map);
+	void blit(int x, int y, Map& minimap);
 	void blit(Player& player);
 	void blit(Items& items);
 

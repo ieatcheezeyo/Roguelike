@@ -246,6 +246,33 @@ void RenderWindow::blit(Map& map) {
 	}
 }
 
+void RenderWindow::blit(int startX, int startY, Map& minimap) {
+	// Loop over the minimap's mapData
+	for (size_t row = 0; row < minimap.mapData.size(); ++row) {
+		for (size_t col = 0; col < minimap.mapData[row].size(); ++col) {
+			char tileID = minimap.mapData[row][col];
+
+			// Set color based on the tileID
+			if (tileID == ' ' || tileID == '.') {
+				setDrawColor(55, 55, 55); // Empty space color
+			} else {
+				setDrawColor(0, 0, 0); // Occupied space color
+			}
+
+			// Calculate the destination rectangle with scaling
+			SDL_Rect dst = {
+				startX + static_cast<int>(col * 4), // Scale x-coordinate
+				startY + static_cast<int>(row * 4), // Scale y-coordinate
+				4, // Width of the tile
+				4  // Height of the tile
+			};
+
+			// Draw the rectangle
+			drawRect("fill", dst.x, dst.y, dst.w, dst.h);
+		}
+	}
+}
+
 void RenderWindow::blit(Player& player) {
 	SDL_Rect dst = applyCameraOffset(player.position.x, player.position.y, player.w, player.h);
 	SDL_RenderCopy(renderer, player.texture, NULL, &dst);
@@ -297,7 +324,7 @@ void RenderWindow::printf(int x, int y, const char* format, ...) {
 
 void RenderWindow::drawRect(const char* mode, int x, int y, int w, int h) {
 	SDL_SetRenderDrawColor(renderer, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
-	SDL_Rect dst = applyCameraOffset(x, y, w, h);
+	SDL_Rect dst = { x, y, w, h };
 	if (strcmp(mode, "fill") == 0) {
 		SDL_RenderFillRect(renderer, &dst);
 	} else if (strcmp(mode, "line") == 0) {

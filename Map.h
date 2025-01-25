@@ -5,6 +5,8 @@
 #include <ctime>
 #include <random>
 #include <queue>
+#include <numeric>
+#include <functional>
 #include <tuple>
 #include <unordered_map>
 #include <bitset>
@@ -12,6 +14,8 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+
+#include "BitMaskToTile.h"
 
 #include "Tile.h"
 #include "Items.h"
@@ -31,6 +35,9 @@ public:
 	void connectAreas();
 	void carvePath(int x1, int y1, int x2, int y2);
 	void applyBitmasking();
+	void ensureConnectivity();
+	void cleanIsolatedTiles();
+	void floodFillAssignRegion(int x, int y, std::vector<std::vector<int>>& regionMap, int regionId);
 
 	std::vector<SDL_Texture*> textures;
 	std::vector<Tile> tiles;

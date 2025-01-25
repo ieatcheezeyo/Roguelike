@@ -41,11 +41,14 @@ int main(int argc, char* argv[]) {
     Player player(0, 0, SCALE, playerTexture);
 
     Map map(mapWidth, mapHeight, SCALE, screen.getRenderer());
-    map.generateDungeon(SDL_GetTicks64() * 64);
+    map.generateDungeon(SDL_GetTicks64());
 
     player.findSpawnPoint(map.mapData);
 
     bool running = true;
+    bool minimap = false;
+    bool showPlayerIndicator = true;
+    float playerIndicatorFlashTimer = 0.0f;
 
     SDL_Event event;
 
@@ -58,13 +61,12 @@ int main(int argc, char* argv[]) {
             running = false;
         } else if (pad.button_select && !pad.old_button_select) {
             running = false;
-        }
+		} else if (pad.button_start && !pad.old_button_start) {
+			minimap = !minimap;
+		}
 
         if (pad.button_a && !pad.old_button_a) {
-            player.position.x = 1;
-            player.position.y = 1;
-			player.targetPosition.x = 1;
-			player.targetPosition.y = 1;
+            player.findSpawnPoint(map.mapData);
 
             screen.cameraShake(10.0f, 0.5f);
 			screen.playSFX("gravel");
@@ -93,6 +95,34 @@ int main(int argc, char* argv[]) {
 
 		//screen.setDrawColor(255, 255, 255);
 		//screen.drawRect("line", player.position.x, player.position.y, 32, 32);
+
+        if (minimap) {
+            // Center the minimap horizontally and place it 20 pixels from the top
+            int minimapX = SCREEN_WIDTH / 2 - (mapWidth * 4) / 2;
+            int minimapY = 20;
+            screen.blit(minimapX, minimapY, map);
+
+            // Calculate scaled player position for the minimap
+            int playerMinimapX = minimapX + (player.position.x / SCALE / 16) * 4;
+            int playerMinimapY = minimapY + (player.position.y / SCALE / 16) * 4; // Use same scale for consistency
+
+            // Ensure player position stays within minimap bounds
+            playerMinimapX = std::max(minimapX, std::min(playerMinimapX, minimapX + mapWidth * 4 - 1));
+            playerMinimapY = std::max(minimapY, std::min(playerMinimapY, minimapY + mapHeight * 4 - 1));
+
+            // Update flashing timer
+            playerIndicatorFlashTimer += screen.dt();
+            if (playerIndicatorFlashTimer >= 0.5f) {
+                showPlayerIndicator = !showPlayerIndicator;
+                playerIndicatorFlashTimer = 0.0f;
+            }
+
+            // Draw the flashing player indicator
+            if (showPlayerIndicator) {
+                screen.setDrawColor(255, 0, 0); // Red color for player
+                screen.drawRect("fill", playerMinimapX, playerMinimapY, 4, 4);
+            }
+        }
 
         screen.flip();
         pad.lateUpdate();
