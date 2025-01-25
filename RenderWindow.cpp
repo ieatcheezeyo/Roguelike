@@ -217,6 +217,14 @@ void RenderWindow::blit(int x, int y, SDL_Texture* texture) {
 	SDL_RenderCopy(renderer, texture, NULL, &dst);
 }
 
+void RenderWindow::blitUiElement(int x, int y, SDL_Texture* texture) {
+	SDL_Rect dst = { x, y, 0, 0 };
+
+	SDL_QueryTexture(texture, NULL, NULL, &dst.w, &dst.h);
+
+	SDL_RenderCopy(renderer, texture, NULL, &dst);
+}
+
 void RenderWindow::blit(Map& map) {
 	for (size_t y = 0; y < map.mapData.size(); y++) {
 		for (size_t x = 0; x < map.mapData[y].size(); x++) {

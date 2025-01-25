@@ -10,7 +10,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-#define SCALE 3
+#define SCALE 4
 
 int main(int argc, char* argv[]) {
 
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     screen.setFontColor(0, 0, 0);
 
     int mapWidth = (1280 * 2) / 16;
-    int mapHeight = (720 * 2) / 16;
+    int mapHeight = (720 * 3) / 16;
 
 	screen.setCameraBounds((mapWidth * 16) * SCALE, (mapHeight * 16) * SCALE);
 	screen.setViewportSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -37,11 +37,12 @@ int main(int argc, char* argv[]) {
 
 	//Load Textures
     SDL_Texture* playerTexture = screen.loadTexture("Assets/Images/Player.png");
+    SDL_Texture* healthBarTexture = screen.loadTexture("Assets/Images/UI_HealthBar.png");
 
     Player player(0, 0, SCALE, playerTexture);
 
     Map map(mapWidth, mapHeight, SCALE, screen.getRenderer());
-    map.generateDungeon(SDL_GetTicks64());
+    map.generateDungeon((SDL_GetTicks64() * 64) * SDL_GetPerformanceCounter() * 128);
 
     player.findSpawnPoint(map.mapData);
 
@@ -66,13 +67,16 @@ int main(int argc, char* argv[]) {
 		}
 
         if (pad.button_a && !pad.old_button_a) {
-            player.findSpawnPoint(map.mapData);
-
+            //player.findSpawnPoint(map.mapData);
+            player.takeDamage(5);
             screen.cameraShake(10.0f, 0.5f);
-			screen.playSFX("gravel");
+			//screen.playSFX("gravel");
+        } else if (pad.button_b && !pad.old_button_b) {
+            player.refillHealth(5);
+            player.inventory.printInventory();
         }
 
-        player.update(map.mapData, pad, screen.dt());
+        player.update(map, pad, screen.dt());
 
         if (player.hasMoved()) {
 			screen.playSFX("gravel");
@@ -88,10 +92,8 @@ int main(int argc, char* argv[]) {
 		
 
         screen.setFontColor(255, 255, 255);
-        //screen.printf(10, 5, "%s, %i, %i", itemsManager.items[0]->name.c_str(), itemsManager.items[0]->x / 16, itemsManager.items[0]->y / 16);
-        //screen.printf(10, 5, "DT: %.3f", screen.dt());
-        screen.printf(10, 25, "FPS: %.2f", screen.getFPS());
-        screen.printf(10, 55, "Player Position: X(%i),Y(%i)", (player.position.x / SCALE) / 16, (player.position.y / SCALE) / 16);
+        screen.printf(SCREEN_WIDTH - 130, 25, "FPS: %.2f", screen.getFPS());
+        
 
 		//screen.setDrawColor(255, 255, 255);
 		//screen.drawRect("line", player.position.x, player.position.y, 32, 32);
@@ -122,6 +124,22 @@ int main(int argc, char* argv[]) {
                 screen.setDrawColor(255, 0, 0); // Red color for player
                 screen.drawRect("fill", playerMinimapX, playerMinimapY, 4, 4);
             }
+
+            screen.printf(10, 25, "Position: X(%i),Y(%i)", (player.position.x / SCALE) / 16, (player.position.y / SCALE) / 16);
+
+        } else {
+            screen.blitUiElement(5, 5, healthBarTexture);
+            screen.setDrawColor(255, 0, 0);
+
+            // Scale player's health (0-100) to fit the inner width of the health bar
+            int healthBarTextureWidth = 128;
+            int borderSize = 4;
+            int usableWidth = healthBarTextureWidth - 2 * borderSize; // Inner width of the bar
+            int scaledHealthWidth = static_cast<int>((player.getHealth() / 100.0) * usableWidth);
+
+            // Draw the scaled health bar inside the borders
+            screen.drawRect("fill", 5 + borderSize, 5 + borderSize, scaledHealthWidth, 25 - 2 * borderSize);
+            screen.printf(8, 10, "HP: %i", player.getHealth());
         }
 
         screen.flip();

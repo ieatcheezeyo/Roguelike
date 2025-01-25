@@ -21,7 +21,6 @@ public:
     std::map<std::string, std::string> itemDefinitions;
     std::vector<std::unique_ptr<Item>> items;
 
-
 private:
     int scale;
     SDL_Renderer* renderer;

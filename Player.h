@@ -3,18 +3,23 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <utility>
 
 #include <SDL.h>
 
 #include "Types.h"
 #include "InputManager.h"
+#include "Item.h"
+#include"Items.h"
+#include "Inventory.h"
+#include "Map.h"
 
 class Player {
 public:
 	Player(int x, int y, int scale, SDL_Texture* p_texture);
 	~Player();
 
-	void update(std::vector<std::vector<char>> mapData, InputManager& pad, double dt);
+	void update(Map& map, InputManager& pad, double dt);
 	Vector2 getPosition();
 	void findSpawnPoint(std::vector<std::vector<char>> mapData);
 
@@ -27,9 +32,18 @@ public:
 	int scale;
 
 	bool hasMoved();
+	int getHealth();
+
+	void takeDamage(int damage);
+	void refillHealth(int ammount);
+
+
+	Inventory inventory = Inventory(10);
 
 private:
 	std::vector<char> walkableTiles = { ' ', '.' };
+	int health;
+	int gold;
 	double holdTimer;
 	double holdDelay;
 	double repeatDelay;

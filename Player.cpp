@@ -1,7 +1,7 @@
 #include "Player.h"
 
 Player::Player(int x, int y, int scale, SDL_Texture* p_texture)
-    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false) {
+    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(100), gold(0) {
     position = { x, y };
     targetPosition = position;
     texture = p_texture;
@@ -46,7 +46,7 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
 	targetPosition.y = 0;
 }
 
-void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, double dt) {
+void Player::update(Map& map, InputManager& pad, double dt) {
     justMoved = false;
     Vector2 tilePos = { position.x / (16 * scale), position.y / (16 * scale) };
 
@@ -85,13 +85,13 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
     if (canMove) {
 		for (auto& tile : walkableTiles) {
 		
-            if (pad.dpad_up && mapData[tilePos.y - 1][tilePos.x] == tile) {
+            if (pad.dpad_up && map.mapData[tilePos.y - 1][tilePos.x] == tile) {
                 targetPosition.y -= 16 * scale;
-            } else if (pad.dpad_down && mapData[tilePos.y + 1][tilePos.x] == tile) {
+            } else if (pad.dpad_down && map.mapData[tilePos.y + 1][tilePos.x] == tile) {
                 targetPosition.y += 16 * scale;
-            } else if (pad.dpad_left && mapData[tilePos.y][tilePos.x - 1] == tile) {
+            } else if (pad.dpad_left && map.mapData[tilePos.y][tilePos.x - 1] == tile) {
                 targetPosition.x -= 16 * scale;
-            } else if (pad.dpad_right && mapData[tilePos.y][tilePos.x + 1] == tile) {
+            } else if (pad.dpad_right && map.mapData[tilePos.y][tilePos.x + 1] == tile) {
                 targetPosition.x += 16 * scale;
             }
         }
@@ -116,6 +116,43 @@ void Player::update(std::vector<std::vector<char>> mapData, InputManager& pad, d
 
     if (position.x != targetPosition.x || position.y != targetPosition.y) {
         justMoved = false;
+    }
+
+    for (auto it = map.items.items.begin(); it != map.items.items.end();) {
+        Item* item = it->get();
+
+        bool collides = (position.x >= item->x && position.x <= item->x + item->w &&
+            position.y >= item->y && position.y <= item->y + item->h);
+
+        if (collides) {
+            std::cout << "Player collided with item: " << item->name << "\n";
+
+            if (inventory.addItem(item)) {
+                std::cout << "Item " << item->name << " added to inventory.\n";
+                it = map.items.items.erase(it);
+            } else {
+                std::cerr << "Failed to add item: " << item->name << " to inventory.\n";
+                ++it;
+            }
+        } else {
+            ++it;
+        }
+    }
+}
+
+int Player::getHealth() {
+    return health;
+}
+
+void Player::takeDamage(int damage) {
+    health -= damage;
+}
+
+void Player::refillHealth(int ammount) {
+    health += ammount;
+
+    if (health > 100) {
+        health = 100;
     }
 
 }
