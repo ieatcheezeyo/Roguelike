@@ -1,10 +1,10 @@
 #include "RenderWindow.h"
 
-RenderWindow::RenderWindow(const char* title, int w, int h) {
+RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f), defaultFont(nullptr), drawColor({ 255, 255, 255, 255 }) {
 	screen_w = w;
 	screen_h = h;
 	
-	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN); //| SDL_WINDOW_FULLSCREEN);
 	if (!window) {
 		std::cout << "SDL_CreateWindow() Failed: " << SDL_GetError() << std::endl;
 	}
@@ -18,6 +18,14 @@ RenderWindow::RenderWindow(const char* title, int w, int h) {
 	if (!font) {
 		std::cout << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
 	}
+
+	InventoryContainerTexture = loadTexture("Assets/Images/UI_Inventory_Container.png");
+	InventoryContainerSelectedTexture = loadTexture("Assets/Images/UI_Inventory_Selected_Container.png");
+	InventoryContainerDescriptionTexture = loadTexture("Assets/Images/UI_Inventory_Description_Container.png");
+
+	buttonPromptTextures["A_BUTTON"] = loadTexture("Assets/Images/A_Button.png");
+
+	defaultFont = font;
 
 	backgroundColor = { 0, 0, 0, 255 };
 	fontColor = { 255, 255, 255, 0 };
@@ -56,6 +64,18 @@ Mix_Chunk* RenderWindow::loadSFX(const char* name, const char* file) {
 
 void RenderWindow::playSFX(const char* name) {
 	Mix_PlayChannel(-1, sfx.find(name)->second, 0);
+}
+
+TTF_Font* RenderWindow::createFont(const char* file, int size) {
+	TTF_Font* font = TTF_OpenFont(file, size);
+
+	if (!font) {
+		std::cout << "Error Loading User Font: " << TTF_GetError() << std::endl;
+		return nullptr;
+	}
+
+	userFonts.push_back(font);
+	return userFonts.back();
 }
 
 void RenderWindow::tick() {
@@ -225,6 +245,11 @@ void RenderWindow::blitUiElement(int x, int y, SDL_Texture* texture) {
 	SDL_RenderCopy(renderer, texture, NULL, &dst);
 }
 
+void RenderWindow::blitUiElement(int x, int y, int w, int h, SDL_Texture* texture) {
+	SDL_Rect dst = { x, y, w, h };
+	SDL_RenderCopy(renderer, texture, NULL, &dst);
+}
+
 void RenderWindow::blit(Map& map) {
 	for (size_t y = 0; y < map.mapData.size(); y++) {
 		for (size_t x = 0; x < map.mapData[y].size(); x++) {
@@ -245,8 +270,8 @@ void RenderWindow::blit(Map& map) {
 	}
 
 	for (auto& item : map.items.items) {
-		item->w = 16 * map.scale;
-		item->h = 16 * map.scale;
+		item->w = 16;
+		item->h = 16;
 
 		SDL_Rect dst = applyCameraOffset(item->x, item->y, item->w * item->scale, item->h * item->scale);
 
@@ -255,28 +280,25 @@ void RenderWindow::blit(Map& map) {
 }
 
 void RenderWindow::blit(int startX, int startY, Map& minimap) {
-	// Loop over the minimap's mapData
 	for (size_t row = 0; row < minimap.mapData.size(); ++row) {
 		for (size_t col = 0; col < minimap.mapData[row].size(); ++col) {
 			char tileID = minimap.mapData[row][col];
 
-			// Set color based on the tileID
 			if (tileID == ' ' || tileID == '.') {
-				setDrawColor(55, 55, 55); // Empty space color
+				setDrawColor(55, 55, 55);
 			} else {
-				setDrawColor(0, 0, 0); // Occupied space color
+				setDrawColor(0, 0, 0);
 			}
 
-			// Calculate the destination rectangle with scaling
 			SDL_Rect dst = {
-				startX + static_cast<int>(col * 4), // Scale x-coordinate
-				startY + static_cast<int>(row * 4), // Scale y-coordinate
-				4, // Width of the tile
-				4  // Height of the tile
+				startX + static_cast<int>(col * 4),
+				startY + static_cast<int>(row * 4),
+				4,
+				4
 			};
 
-			// Draw the rectangle
 			drawRect("fill", dst.x, dst.y, dst.w, dst.h);
+
 		}
 	}
 }
@@ -290,6 +312,54 @@ void RenderWindow::blit(Items& items) {
 	for (auto& item : items.items) {
 		SDL_Rect dst = applyCameraOffset(item->x, item->y, item->w, item->h);
 		SDL_RenderCopy(renderer, item->texture, NULL, &dst);
+	}
+}
+
+void RenderWindow::blit(Inventory& inv, int startX, int startY, int slotWidth, int slotHeight) {
+	for (size_t i = 0; i < inv.inventory.size() && i < 10; ++i) { // Render up to 10 slots
+		int x = startX;                    // Slot's X position
+		int y = startY + i * (slotHeight + 5); // Slot's Y position with 5px padding
+
+		// Render the slot background
+		setDrawColor(50, 50, 50); // Gray background for empty slots
+		//drawRect("fill", x, y, slotWidth, slotHeight);
+		if (inv.index == i) {
+			blitUiElement(x, y, InventoryContainerSelectedTexture);
+		} else {
+			blitUiElement(x, y, InventoryContainerTexture);
+		}
+
+		if (inv.inventory[i]) {
+			// Render the item icon on the left inside the slot
+			int iconSize = slotHeight - 8; // Icon size slightly smaller than slot height
+			blitUiElement(x + 4, y + 4, iconSize, iconSize, inv.inventory[i]->texture);
+
+			// Render the item name inside the slot to the right of the icon
+			setDrawColor(255, 255, 255); // White text
+			print(x + 4 + iconSize + 8, y + (slotHeight / 2) - 8, inv.inventory[i]->name.c_str());
+		}
+			
+		int detailX = (startX + slotWidth) + 5;
+		int detailY = (startY + 5);
+
+		//blitUiElement((startX + slotWidth) + 5, startY, InventoryContainerDescriptionTexture);
+
+		if (inv.inventory[inv.index] != nullptr) {
+			blitUiElement((startX + slotWidth) + 5, startY, InventoryContainerDescriptionTexture);
+			printf((detailX + 10), (detailY + 10), "Item Description: %s", inv.inventory[inv.index]->description.c_str());
+			printf((detailX + 10), detailY + 30, "ATK : %i    DEF : %i    VALUE : %i", inv.inventory[inv.index]->atk, inv.inventory[inv.index]->def, inv.inventory[inv.index]->value);
+		
+			/////////////////////////////////////////////////
+			//           U ARE HERE!     IMPLEMENT         //
+			/////////////////////////////////////////////////
+			//    Button Prompts and actions : USE, DROP   //
+			/////////////////////////////////////////////////
+
+
+			blitUiElement(0, 0, buttonPromptTextures["A_BUTTON"]);
+
+		}
+
 	}
 }
 
@@ -372,6 +442,18 @@ void RenderWindow::setFontColor(Uint8 r, Uint8 g, Uint8 b) {
 	fontColor = { r, g, b, 255 };
 }
 
+void RenderWindow::setFont(TTF_Font* newFont) {
+	if (!newFont) {
+		std::cout << "New Font is NULL." << std::endl;
+	}
+
+	font = newFont;
+}
+
+void RenderWindow::setFont() {
+	font = defaultFont;
+}
+
 void RenderWindow::clean() {
 	for (SDL_Texture* texture : textures) {
 		std::cout << "Destrtoying Texture: " << texture << std::endl;
@@ -384,4 +466,11 @@ void RenderWindow::clean() {
 		Mix_FreeChunk(sfxPair.second);
 	}
 	sfx.clear();
+
+	for (auto& font : userFonts) {
+		std::cout << "Destroying User Font: " << font << std::endl;
+		TTF_CloseFont(font);
+	}
+	userFonts.clear();
+
 }

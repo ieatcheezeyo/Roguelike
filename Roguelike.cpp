@@ -38,6 +38,9 @@ int main(int argc, char* argv[]) {
 	//Load Textures
     SDL_Texture* playerTexture = screen.loadTexture("Assets/Images/Player.png");
     SDL_Texture* healthBarTexture = screen.loadTexture("Assets/Images/UI_HealthBar.png");
+    SDL_Texture* coinCountTexture = screen.loadTexture("Assets/Images/UI_Coin.png");
+
+    TTF_Font* inventoryFont = screen.createFont("Assets/Fonts/default.ttf", 12);
 
     Player player(0, 0, SCALE, playerTexture);
 
@@ -48,6 +51,7 @@ int main(int argc, char* argv[]) {
 
     bool running = true;
     bool minimap = false;
+    bool inventory = false;
     bool showPlayerIndicator = true;
     float playerIndicatorFlashTimer = 0.0f;
 
@@ -63,7 +67,8 @@ int main(int argc, char* argv[]) {
         } else if (pad.button_select && !pad.old_button_select) {
             running = false;
 		} else if (pad.button_start && !pad.old_button_start) {
-			minimap = !minimap;
+
+            inventory = !inventory;
 		}
 
         if (pad.button_a && !pad.old_button_a) {
@@ -74,6 +79,8 @@ int main(int argc, char* argv[]) {
         } else if (pad.button_b && !pad.old_button_b) {
             player.refillHealth(5);
             player.inventory.printInventory();
+        } else if (pad.button_y && !pad.old_button_y) {
+            minimap = !minimap;
         }
 
         player.update(map, pad, screen.dt());
@@ -129,6 +136,7 @@ int main(int argc, char* argv[]) {
 
         } else {
             screen.blitUiElement(5, 5, healthBarTexture);
+            screen.blitUiElement(5, 35, coinCountTexture);
             screen.setDrawColor(255, 0, 0);
 
             // Scale player's health (0-100) to fit the inner width of the health bar
@@ -139,7 +147,28 @@ int main(int argc, char* argv[]) {
 
             // Draw the scaled health bar inside the borders
             screen.drawRect("fill", 5 + borderSize, 5 + borderSize, scaledHealthWidth, 25 - 2 * borderSize);
-            screen.printf(8, 10, "HP: %i", player.getHealth());
+            
+            screen.printf(30, 10, "HP: %i", player.getHealth());
+            screen.printf(40, 45, "x%03i", player.getGold());
+        }
+
+        player.isControllable = !inventory;
+
+        if (inventory) {
+            if (pad.dpad_down && !pad.old_dpad_down) {
+                player.inventory.index = (player.inventory.index + 1) % player.inventory.inventory.size();
+            } else if (pad.dpad_up && !pad.old_dpad_up) {
+                player.inventory.index = (player.inventory.index - 1) % player.inventory.inventory.size();
+            }
+
+            // Set inventory font for rendering
+            screen.setFont(inventoryFont);
+
+            // Render inventory
+            screen.blit(player.inventory, 5, 128, 128, 32);
+
+            // Reset font to default
+            screen.setFont();
         }
 
         screen.flip();

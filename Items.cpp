@@ -4,7 +4,6 @@
 #include <ctime>
 
 Items::Items(SDL_Renderer* renderer) : renderer(renderer) {
-    std::srand(static_cast<unsigned>(std::time(0))); // Seed for random number generation
     initializeItemDefinitions();
 }
 
@@ -16,40 +15,48 @@ Items::~Items() {
 }
 
 void Items::initializeItemDefinitions() {
-    itemDefinitions["Coin"] = "Assets/Images/Coin.png";
-	itemDefinitions["HealthPotion"] = "Assets/Images/Health_Potion.png";
-    // Add other items here (e.g., "Potion", "Sword")
+    itemDefinitions["Health Potion"] = "Restores 50 HP.";
+    itemDefinitions["Short Sword"] = "A sharp blade for battle.";
+    itemDefinitions["Wooden Shield"] = "Provides defense against attacks.";
+    itemDefinitions["Coin"] = "Adds to your wealth.";
 }
 
 SDL_Texture* Items::loadTexture(const std::string& file) {
-    SDL_Texture* tempTexture = IMG_LoadTexture(renderer, file.c_str());
-    if (!tempTexture) {
-        std::cerr << "IMG_LoadTexture() Failed: " << IMG_GetError() << std::endl;
+    static std::map<std::string, SDL_Texture*> textureCache;
+
+    if (textureCache.find(file) != textureCache.end()) {
+        return textureCache[file];
+    }
+
+    SDL_Texture* texture = IMG_LoadTexture(renderer, file.c_str());
+    if (!texture) {
+        std::cerr << "Failed to load texture: " << file << "\n";
         return nullptr;
     }
-    textures.push_back(tempTexture);
-    return tempTexture;
+
+    textureCache[file] = texture;
+    textures.push_back(texture);
+    return texture;
 }
 
 std::pair<int, int> Items::getRandomPosition() const {
     return { 0, 0 };
 }
 
-void Items::createItem(int x, int y, int scale, const std::string& name) {
-    scale = scale;
+Item* Items::createItem(int x, int y, int scale, const std::string& name) {
     auto it = itemDefinitions.find(name);
     if (it == itemDefinitions.end()) {
-        std::cerr << "Item definition not found for: " << name << std::endl;
-        return;
+        std::cerr << "Item name not defined: " << name << "\n";
+        return nullptr;
     }
 
-    SDL_Texture* texture = loadTexture(it->second);
-    if (!texture) return;
+    SDL_Texture* texture = loadTexture("Assets/Images/Items/" + name + ".png");
+    if (!texture) return nullptr;
 
-    x = x;
-    y = y;
-
-    items.push_back(std::make_unique<Item>(name, texture, x, y));
+    auto item = std::make_unique<Item>(name, texture, x, y, scale);
+    Item* itemPtr = item.get();
+    items.push_back(std::move(item));
+    return itemPtr;
 }
 
 void Items::updateItems(double dt) {
@@ -57,3 +64,5 @@ void Items::updateItems(double dt) {
         item->update(dt);
     }
 }
+
+

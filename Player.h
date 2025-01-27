@@ -10,7 +10,7 @@
 #include "Types.h"
 #include "InputManager.h"
 #include "Item.h"
-#include"Items.h"
+#include "Items.h"
 #include "Inventory.h"
 #include "Map.h"
 
@@ -33,12 +33,14 @@ public:
 
 	bool hasMoved();
 	int getHealth();
+	int getGold();
 
 	void takeDamage(int damage);
 	void refillHealth(int ammount);
 
+	bool isControllable;
 
-	Inventory inventory = Inventory(10);
+	Inventory inventory;
 
 private:
 	std::vector<char> walkableTiles = { ' ', '.' };
@@ -49,5 +51,6 @@ private:
 	double repeatDelay;
 	bool isHolding;
 	bool justMoved;
+
 };
 

@@ -1,7 +1,10 @@
-﻿  Roguelike.cpp
+﻿  RenderWindow.cpp
+C:\Users\toddd\OneDrive\Desktop\Roguelike\RenderWindow.cpp(321,9): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Roguelike.cpp
 C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(29,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(29,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(116,51): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(54,15): warning C4101: 'event': unreferenced local variable
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(123,51): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(58,15): warning C4101: 'event': unreferenced local variable
+  Generating Code...
   Roguelike.vcxproj -> C:\Users\toddd\OneDrive\Desktop\x64\Debug\Roguelike.exe
   15 File(s) copied

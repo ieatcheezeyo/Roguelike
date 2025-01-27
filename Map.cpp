@@ -589,7 +589,7 @@ void Map::applyBitmasking() {
 }
 
 void Map::spawnItems() {
-    int maxItems = 10;
+    int maxItems = 50;
     int itemCount = 0;
 
     while (itemCount < maxItems) {
@@ -600,14 +600,45 @@ void Map::spawnItems() {
             int worldX = (x * 16) * scale;
             int worldY = (y * 16) * scale;
 
-			int r = std::rand() % 2;
+			int r = std::rand() % 4;
 
+            Item* newItem = nullptr;
             switch (r) {
             case 0:
-				items.createItem(worldX, worldY, scale, "Coin");
+                newItem = items.createItem(worldX, worldY, scale, "Coin");
+                if (newItem) {
+                    newItem->atk = 0;
+                    newItem->def = 0;
+                    newItem->value = 1;
+                    newItem->description = "Shit, How did you see this?";
+                }
 				break;
 			case 1:
-				items.createItem(worldX, worldY, scale, "HealthPotion");
+                newItem = items.createItem(worldX, worldY, scale, "Health Potion");
+                if (newItem) {
+                    newItem->atk = 0;
+                    newItem->def = 0;
+                    newItem->value = 10;
+                    newItem->description = "Restores some health points.";
+                }
+                break;
+            case 2:
+                newItem = items.createItem(worldX, worldY, scale, "Short Sword");
+                if (newItem) {
+                    newItem->atk = rand() % 20;
+                    newItem->def = 0;
+                    newItem->value = 100 + newItem->atk / 2;
+                    newItem->description = "A standard short sword, good for swinging.";
+                }
+                break;
+            case 3:
+                newItem = items.createItem(worldX, worldY, scale, "Wooden Shield");
+                if (newItem) {
+                    newItem->atk = 0;
+                    newItem->def = rand() % 15;
+                    newItem->value = 50 + newItem->def / 2;
+                    newItem->description = "A puny wooden shield, better than nothing.";
+                }
                 break;
             }
 			++itemCount;

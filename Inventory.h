@@ -2,10 +2,12 @@
 
 #include <vector>
 #include <algorithm>
+
 #include "Item.h"
 
 class Inventory {
 public:
+    Inventory();
     Inventory(int inventorySize);
     ~Inventory();
 
@@ -14,7 +16,7 @@ public:
 
     void printInventory() const;
 
-private:
     int inventorySize;
+    int index;
     std::vector<Item*> inventory;
 };

@@ -1,8 +1,12 @@
 #include "Inventory.h"
 #include <iostream>
 
-Inventory::Inventory(int inventorySize) : inventorySize(inventorySize) {
+Inventory::Inventory(int inventorySize) : inventorySize(inventorySize), index(0) {
     inventory.resize(inventorySize, nullptr); // Initialize with empty slots
+}
+
+Inventory::Inventory() : inventorySize(10) {
+    inventory.resize(inventorySize, nullptr);
 }
 
 Inventory::~Inventory() {

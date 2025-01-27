@@ -16,6 +16,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "Items.h"
+#include "Inventory.h"
 
 //////////////////////////////////////////////////////////////////
 // FILE   : RenderWindow Class
@@ -45,6 +46,8 @@ public:
 	Mix_Chunk* loadSFX(const char* name, const char* file);
 	void playSFX(const char* name);
 
+	TTF_Font* createFont(const char* file, int size);
+
 	void setCameraPosition(float x, float y);
 	void moveCamera(float dx, float dy);
 	void cameraShake(float amplitude, float duration);
@@ -63,10 +66,12 @@ public:
 
 	void blit(int x, int y, SDL_Texture* texture);
 	void blitUiElement(int x, int y, SDL_Texture* texture);
+	void blitUiElement(int x, int y, int w, int h, SDL_Texture* texture);
 	void blit(Map& map);
 	void blit(int x, int y, Map& minimap);
 	void blit(Player& player);
 	void blit(Items& items);
+	void blit(Inventory& inventory, int startX, int startY, int slotWidth, int slotHeight);
 
 	void print(int x, int y, const char* text);
 	void printf(int x, int y, const char* format, ...);
@@ -82,6 +87,8 @@ public:
 	void setBackgroundColor(Uint8 r, Uint8 g, Uint8 b);
 	void setDrawColor(Uint8 r, Uint8 g, Uint8 b);
 	void setFontColor(Uint8 r, Uint8 g, Uint8 b);
+	void setFont(TTF_Font* newFont);
+	void setFont();
 
 private:
 	//Window And Renderer
@@ -97,9 +104,11 @@ private:
 	std::vector<SDL_Texture*> textures;
 
 	//Font
+	TTF_Font* defaultFont;
 	TTF_Font* font;
 	int fontSize = 24;
 	SDL_Color fontColor;
+	std::vector<TTF_Font*> userFonts;
 
 	//SFX
 	std::unordered_map<const char*, Mix_Chunk*> sfx;
@@ -131,6 +140,14 @@ private:
 
 	// Private Functions
 	void clean();
+
+	//UI
+	SDL_Texture* InventoryContainerTexture;
+	SDL_Texture* InventoryContainerSelectedTexture;
+	SDL_Texture* InventoryContainerDescriptionTexture;
+
+	//Button Prompts
+	std::unordered_map<std::string, SDL_Texture*> buttonPromptTextures;
 
 };
 
