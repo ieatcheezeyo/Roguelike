@@ -24,6 +24,7 @@ RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f),
 	InventoryContainerDescriptionTexture = loadTexture("Assets/Images/UI_Inventory_Description_Container.png");
 
 	buttonPromptTextures["A_BUTTON"] = loadTexture("Assets/Images/A_Button.png");
+	buttonPromptTextures["X_BUTTON"] = loadTexture("Assets/Images/X_Button.png");
 
 	defaultFont = font;
 
@@ -258,10 +259,10 @@ void RenderWindow::blit(Map& map) {
 			for (Tile& tile : map.tiles) {
 				if (tile.symbol == tileID) {
 					SDL_Rect dst = applyCameraOffset(
-						static_cast<int>(x * 16 * map.scale), // Scale the x-coordinate
-						static_cast<int>(y * 16 * map.scale), // Scale the y-coordinate
-						16 * map.scale, // Scale the width
-						16 * map.scale  // Scale the height
+						static_cast<int>(x * 16 * map.scale),
+						static_cast<int>(y * 16 * map.scale),
+						16 * map.scale,
+						16 * map.scale
 					);
 					SDL_RenderCopy(renderer, tile.texture, NULL, &dst);
 				}
@@ -277,6 +278,23 @@ void RenderWindow::blit(Map& map) {
 
 		SDL_RenderCopy(renderer, item->texture, NULL, &dst);
 	}
+
+	for (auto& enemy : map.enemies) {
+		if (enemy && enemy->texture) {
+			enemy->w = 16;
+			enemy->h = 16;
+
+			SDL_Rect dst = applyCameraOffset(
+				enemy->position.x * enemy->w * enemy->scale,
+				enemy->position.y * enemy->h * enemy->scale,
+				enemy->w * enemy->scale,
+				enemy->h * enemy->scale
+			);
+
+			SDL_RenderCopy(renderer, enemy->texture, NULL, &dst);
+		}
+	}
+
 }
 
 void RenderWindow::blit(int startX, int startY, Map& minimap) {
@@ -330,33 +348,68 @@ void RenderWindow::blit(Inventory& inv, int startX, int startY, int slotWidth, i
 		}
 
 		if (inv.inventory[i]) {
-			// Render the item icon on the left inside the slot
-			int iconSize = slotHeight - 8; // Icon size slightly smaller than slot height
+			int iconSize = slotHeight - 8;
 			blitUiElement(x + 4, y + 4, iconSize, iconSize, inv.inventory[i]->texture);
 
-			// Render the item name inside the slot to the right of the icon
-			setDrawColor(255, 255, 255); // White text
+			if (inv.inventory[i]->equiped) {
+				setFontColor(255, 255, 0);
+				print(x + 4, y + 4, "E");
+				setFontColor(255, 255, 255);
+			}
+
+			setDrawColor(255, 255, 255);
 			print(x + 4 + iconSize + 8, y + (slotHeight / 2) - 8, inv.inventory[i]->name.c_str());
 		}
 			
 		int detailX = (startX + slotWidth) + 5;
 		int detailY = (startY + 5);
 
-		//blitUiElement((startX + slotWidth) + 5, startY, InventoryContainerDescriptionTexture);
-
 		if (inv.inventory[inv.index] != nullptr) {
 			blitUiElement((startX + slotWidth) + 5, startY, InventoryContainerDescriptionTexture);
 			printf((detailX + 10), (detailY + 10), "Item Description: %s", inv.inventory[inv.index]->description.c_str());
 			printf((detailX + 10), detailY + 30, "ATK : %i    DEF : %i    VALUE : %i", inv.inventory[inv.index]->atk, inv.inventory[inv.index]->def, inv.inventory[inv.index]->value);
-		
-			/////////////////////////////////////////////////
-			//           U ARE HERE!     IMPLEMENT         //
-			/////////////////////////////////////////////////
-			//    Button Prompts and actions : USE, DROP   //
-			/////////////////////////////////////////////////
 
+			ItemType thisItemsType = inv.inventory[inv.index]->type;
 
-			blitUiElement(0, 0, buttonPromptTextures["A_BUTTON"]);
+			switch (thisItemsType) {
+				case recover_hp:
+					blitUiElement(detailX + 5, detailY + 222 - 42, buttonPromptTextures["A_BUTTON"]);
+					print(detailX + 42, detailY + 222 - 30, "Drink");
+					blitUiElement(detailX + 562, detailY + 222 - 42, buttonPromptTextures["X_BUTTON"]);
+					print(detailX + 598, detailY + 222 - 30, "Drop");
+					break;
+				case weapon:
+					blitUiElement(detailX + 5, detailY + 222 - 42, buttonPromptTextures["A_BUTTON"]);
+					if (inv.inventory[inv.index]->equiped == false) {
+						print(detailX + 42, detailY + 222 - 30, "Equip");
+					} else {
+						print(detailX + 42, detailY + 222 - 30, "Unequip");
+					}
+					blitUiElement(detailX + 562, detailY + 222 - 42, buttonPromptTextures["X_BUTTON"]);
+					print(detailX + 598, detailY + 222 - 30, "Drop");
+					break;
+				case shield:
+					blitUiElement(detailX + 5, detailY + 222 - 42, buttonPromptTextures["A_BUTTON"]);
+					if (inv.inventory[inv.index]->equiped == false) {
+						print(detailX + 42, detailY + 222 - 30, "Equip");
+					} else {
+						print(detailX + 42, detailY + 222 - 30, "Unequip");
+					}
+					blitUiElement(detailX + 562, detailY + 222 - 42, buttonPromptTextures["X_BUTTON"]);
+					print(detailX + 598, detailY + 222 - 30, "Drop");
+					break;
+				case food:
+					blitUiElement(detailX + 5, detailY + 222 - 42, buttonPromptTextures["A_BUTTON"]);
+					print(detailX + 42, detailY + 222 - 30, "Eat");
+					blitUiElement(detailX + 562, detailY + 222 - 42, buttonPromptTextures["X_BUTTON"]);
+					print(detailX + 598, detailY + 222 - 30, "Drop");
+					break;
+				default:
+					break;
+			}
+			if (thisItemsType == recover_hp) {
+
+			}
 
 		}
 

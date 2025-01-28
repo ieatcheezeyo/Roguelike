@@ -1,10 +1,16 @@
 #include "Player.h"
 
 Player::Player(int x, int y, int scale, SDL_Texture* p_texture)
-    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(100), gold(0), isControllable(true) {
+    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(rand() % 75), gold(0), isControllable(true) {
     position = { x, y };
     targetPosition = position;
     texture = p_texture;
+
+    baseDef = rand() % 5;
+    baseAtk = rand() % 5;
+
+    def = baseDef;
+    atk = baseAtk;
 
     SDL_QueryTexture(p_texture, NULL, NULL, &w, &h);
 

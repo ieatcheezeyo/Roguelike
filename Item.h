@@ -4,10 +4,15 @@
 #include <string>
 
 enum ItemType {
+    treasure,
     recover_hp,
     poison,
     weapon,
-    armor
+    food,
+    armor,
+    shield,
+    ring,
+    undefined
 };
 
 class Item {
@@ -20,9 +25,12 @@ public:
     std::string name;
     std::string description;
     bool equipable;
+    bool equiped;
+    bool dropable;
     int atk;
     int def;
     int value;
+    ItemType type;
 
     SDL_Texture* texture;
     int x, y;

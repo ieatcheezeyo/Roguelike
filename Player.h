@@ -42,6 +42,11 @@ public:
 
 	Inventory inventory;
 
+	int atk;
+	int def;
+	int baseAtk;
+	int baseDef;
+
 private:
 	std::vector<char> walkableTiles = { ' ', '.' };
 	int health;

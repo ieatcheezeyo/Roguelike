@@ -19,6 +19,7 @@ void Items::initializeItemDefinitions() {
     itemDefinitions["Short Sword"] = "A sharp blade for battle.";
     itemDefinitions["Wooden Shield"] = "Provides defense against attacks.";
     itemDefinitions["Coin"] = "Adds to your wealth.";
+    itemDefinitions["Raw Steak"];
 }
 
 SDL_Texture* Items::loadTexture(const std::string& file) {

@@ -19,6 +19,7 @@
 
 #include "Tile.h"
 #include "Items.h"
+#include "Enemy.h"
 
 class Map {
 public:
@@ -49,6 +50,7 @@ public:
 	int scale;
 
 	Items items;
+	std::vector<Enemy*> enemies;
 
 private:
 	int w, h;
@@ -56,6 +58,7 @@ private:
 	void randomizeGroundTiles();
 
 	void spawnItems();
+	void spawnEnemies();
 
 	SDL_Renderer* renderer;
 	SDL_Texture* loadTileTexture(const char* file);

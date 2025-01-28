@@ -277,6 +277,7 @@ void Map::generateDungeon(Uint64 seed) {
     cleanIsolatedTiles();
 
 	spawnItems();
+    spawnEnemies();
 
 }
 
@@ -600,7 +601,7 @@ void Map::spawnItems() {
             int worldX = (x * 16) * scale;
             int worldY = (y * 16) * scale;
 
-			int r = std::rand() % 4;
+			int r = std::rand() % 5;
 
             Item* newItem = nullptr;
             switch (r) {
@@ -611,6 +612,9 @@ void Map::spawnItems() {
                     newItem->def = 0;
                     newItem->value = 1;
                     newItem->description = "Shit, How did you see this?";
+                    newItem->equipable = false;
+                    newItem->dropable = false;
+                    newItem->type = treasure;
                 }
 				break;
 			case 1:
@@ -620,6 +624,9 @@ void Map::spawnItems() {
                     newItem->def = 0;
                     newItem->value = 10;
                     newItem->description = "Restores some health points.";
+                    newItem->equipable = false;
+                    newItem->dropable = true;
+                    newItem->type = recover_hp;
                 }
                 break;
             case 2:
@@ -629,6 +636,9 @@ void Map::spawnItems() {
                     newItem->def = 0;
                     newItem->value = 100 + newItem->atk / 2;
                     newItem->description = "A standard short sword, good for swinging.";
+                    newItem->equipable = true;
+                    newItem->dropable = true;
+                    newItem->type = weapon;
                 }
                 break;
             case 3:
@@ -638,11 +648,33 @@ void Map::spawnItems() {
                     newItem->def = rand() % 15;
                     newItem->value = 50 + newItem->def / 2;
                     newItem->description = "A puny wooden shield, better than nothing.";
+                    newItem->equipable = true;
+                    newItem->dropable = true;
+                    newItem->type = shield;
+                }
+                break;
+            case 4:
+                newItem = items.createItem(worldX, worldY, scale, "Raw Steak");
+                if (newItem) {
+                    newItem->atk = 0;
+                    newItem->def = 0;
+                    newItem->value = 15;
+                    newItem->description = "A Raw Steak you found on the floor.";
+                    newItem->equipable = false;
+                    newItem->dropable = true;
+                    newItem->type = food;
                 }
                 break;
             }
 			++itemCount;
 
         }
+    }
+}
+
+void Map::spawnEnemies() {
+    Enemy enemySpawner(renderer);
+    for (int i = 0; i < 10; i++) {
+        enemies.push_back(enemySpawner.createEnemy(mapData));
     }
 }

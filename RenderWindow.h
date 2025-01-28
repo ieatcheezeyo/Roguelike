@@ -17,6 +17,7 @@
 #include "Map.h"
 #include "Items.h"
 #include "Inventory.h"
+#include "Enemy.h"
 
 //////////////////////////////////////////////////////////////////
 // FILE   : RenderWindow Class

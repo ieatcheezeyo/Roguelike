@@ -16,9 +16,6 @@ public:
 
     Item* createItem(int x, int y, int scale, const std::string& name);
     void updateItems(double dt);
-    void createDescription(std::string description);
-    void addStats(int atk, int def);
-    void setValue(int value);
     SDL_Texture* loadTexture(const std::string& file);
     std::map<std::string, std::string> itemDefinitions;
     std::vector<std::unique_ptr<Item>> items;

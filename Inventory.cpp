@@ -34,15 +34,29 @@ bool Inventory::addItem(Item* item) {
     return false;
 }
 
+void Inventory::compact() {
+    size_t writeIndex = 0;
+
+    for (size_t readIndex = 0; readIndex < inventory.size(); ++readIndex) {
+        if (inventory[readIndex] != nullptr) {
+            inventory[writeIndex] = inventory[readIndex];
+            ++writeIndex;
+        }
+    }
+
+    for (size_t i = writeIndex; i < inventory.size(); ++i) {
+        inventory[i] = nullptr;
+    }
+}
+
 bool Inventory::removeItem(Item* item) {
-    // Find the item in the inventory
     auto it = std::find(inventory.begin(), inventory.end(), item);
     if (it != inventory.end()) {
-        *it = nullptr; // Mark slot as empty
-        return true; // Successfully removed
+        *it = nullptr;
+        return true;
     }
     std::cerr << "Item not found in inventory!\n";
-    return false; // Item not found
+    return false;
 }
 
 void Inventory::printInventory() const {

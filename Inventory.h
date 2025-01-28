@@ -13,7 +13,7 @@ public:
 
     bool addItem(Item* item);
     bool removeItem(Item* item);
-
+    void compact();
     void printInventory() const;
 
     int inventorySize;
