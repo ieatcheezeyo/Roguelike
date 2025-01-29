@@ -146,6 +146,7 @@ private:
 	SDL_Texture* InventoryContainerTexture;
 	SDL_Texture* InventoryContainerSelectedTexture;
 	SDL_Texture* InventoryContainerDescriptionTexture;
+	SDL_Texture* cursedItemIndecator;
 
 	//Button Prompts
 	std::unordered_map<std::string, SDL_Texture*> buttonPromptTextures;

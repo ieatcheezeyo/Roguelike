@@ -9,6 +9,9 @@
 
 #include "Items.h"
 #include "Types.h"
+#include "Map.h"
+
+class Map;
 
 enum EnemyType {
 	Rat,
@@ -27,7 +30,7 @@ typedef struct {
 class Enemy {
 
 public:
-	Enemy(SDL_Renderer* renderer);
+	Enemy(SDL_Renderer* renderer, Map& map);
 	~Enemy();
 
 	Enemy* createEnemy(std::vector<std::vector<char>> mapData);
@@ -44,6 +47,7 @@ public:
 	std::vector<Items*> EnemyLoot;
 
 private:
+	Map& map;
 
 	SDL_Texture* ratTexture;
 	SDL_Texture* batTexture;
@@ -52,7 +56,6 @@ private:
 
 	std::unordered_map<EnemyType, SDL_Texture*> textureToEnemyTypeMap;
 	SDL_Renderer* renderer;
-
 
 };
 

@@ -20,6 +20,10 @@
 #include "Tile.h"
 #include "Items.h"
 #include "Enemy.h"
+#include "Player.h"
+
+class Enemy;
+class Player;
 
 class Map {
 public:

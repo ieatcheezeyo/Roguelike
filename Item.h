@@ -27,6 +27,7 @@ public:
     bool equipable;
     bool equiped;
     bool dropable;
+    bool cursed;
     int atk;
     int def;
     int value;

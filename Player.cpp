@@ -1,7 +1,7 @@
 #include "Player.h"
 
 Player::Player(int x, int y, int scale, SDL_Texture* p_texture)
-    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(rand() % 75), gold(0), isControllable(true) {
+    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(rand() % 75 + 10), gold(0), isControllable(true) {
     position = { x, y };
     targetPosition = position;
     texture = p_texture;

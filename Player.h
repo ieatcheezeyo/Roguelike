@@ -13,6 +13,9 @@
 #include "Items.h"
 #include "Inventory.h"
 #include "Map.h"
+#include "Enemy.h"
+
+class Map;
 
 class Player {
 public:

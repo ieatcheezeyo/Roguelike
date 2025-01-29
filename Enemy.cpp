@@ -11,7 +11,7 @@ std::vector<const char*> EnemyDescriptors = {
 	"Foul"
 };
 
-Enemy::Enemy(SDL_Renderer* renderer) : renderer(renderer), scale(3), alerted(false) {
+Enemy::Enemy(SDL_Renderer* renderer, Map& map) : renderer(renderer), scale(map.scale), alerted(false), map(map) {
 
 	ratTexture = IMG_LoadTexture(renderer, "Assets/Images/Enemies/Rat.png");
 
@@ -45,13 +45,15 @@ Enemy::Enemy(SDL_Renderer* renderer) : renderer(renderer), scale(3), alerted(fal
 }
 
 Enemy::~Enemy() {
+	//Doen't run?
 	if (texture) {
+		std::cout << "<Enemy> Destroying Texture: " << texture << std::endl;
 		SDL_DestroyTexture(texture);
 	}
 }
 
 Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {
-	Enemy* newEnemy = new Enemy(renderer);
+	Enemy* newEnemy = new Enemy(renderer, map);
 
 	newEnemy->type = static_cast<EnemyType>(std::rand() % EnemyType::COUNT);
 	newEnemy->enemyDescriptor = EnemyDescriptors[std::rand() % EnemyDescriptors.size()];
@@ -106,6 +108,18 @@ void Enemy::update(std::vector<std::vector<char>>& mapData, double dt) {
 		if (mapData[newY][newX] == ' ' || mapData[newY][newX] == '.') {
 			position.x = newX;
 			position.y = newY;
+
+			//If a ghost "walks" over an item it becomes cursed
+			if (type == EnemyType::Ghost) {
+				for (auto& item : map.items.items) {
+					int tileX = (item->x / (16 * map.scale));
+					int tileY = (item->y / (16 * map.scale));
+					if (newX == tileX && newY == tileY) {
+						item->cursed = true;
+						std::cout << "Item Has Been Cursed" << std::endl;
+					}
+				}
+			}
 		}
 	}
 }

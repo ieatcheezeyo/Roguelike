@@ -9,16 +9,17 @@ Items::Items(SDL_Renderer* renderer) : renderer(renderer) {
 
 Items::~Items() {
     for (SDL_Texture* texture : textures) {
+        std::cout << "<Items> Destroying Texture: " << texture << std::endl;
         SDL_DestroyTexture(texture);
     }
     textures.clear();
 }
 
 void Items::initializeItemDefinitions() {
-    itemDefinitions["Health Potion"] = "Restores 50 HP.";
-    itemDefinitions["Short Sword"] = "A sharp blade for battle.";
-    itemDefinitions["Wooden Shield"] = "Provides defense against attacks.";
-    itemDefinitions["Coin"] = "Adds to your wealth.";
+    itemDefinitions["Health Potion"];
+    itemDefinitions["Short Sword"];
+    itemDefinitions["Wooden Shield"];
+    itemDefinitions["Coin"];
     itemDefinitions["Raw Steak"];
 }
 

@@ -23,6 +23,8 @@ RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f),
 	InventoryContainerSelectedTexture = loadTexture("Assets/Images/UI_Inventory_Selected_Container.png");
 	InventoryContainerDescriptionTexture = loadTexture("Assets/Images/UI_Inventory_Description_Container.png");
 
+	cursedItemIndecator = loadTexture("Assets/Images/Cursed_Item_Indicator.png");
+
 	buttonPromptTextures["A_BUTTON"] = loadTexture("Assets/Images/A_Button.png");
 	buttonPromptTextures["X_BUTTON"] = loadTexture("Assets/Images/X_Button.png");
 
@@ -277,6 +279,11 @@ void RenderWindow::blit(Map& map) {
 		SDL_Rect dst = applyCameraOffset(item->x, item->y, item->w * item->scale, item->h * item->scale);
 
 		SDL_RenderCopy(renderer, item->texture, NULL, &dst);
+
+		if (item->cursed) {
+			SDL_RenderCopy(renderer, cursedItemIndecator, NULL, &dst);
+		}
+
 	}
 
 	for (auto& enemy : map.enemies) {
@@ -509,21 +516,21 @@ void RenderWindow::setFont() {
 
 void RenderWindow::clean() {
 	for (SDL_Texture* texture : textures) {
-		std::cout << "Destrtoying Texture: " << texture << std::endl;
+		//std::cout << "<RenderWindow> Destrtoying Texture: " << texture << std::endl;
 		SDL_DestroyTexture(texture);
 	}
 	textures.clear();
 
+	//Destroy buttonPromptTextures
+
 	for (auto& sfxPair : sfx) {
-		std::cout << "Destroying SFX: " << sfxPair.first << std::endl;
+		//std::cout << "<RenderWindow> Destroying SFX: " << sfxPair.first << std::endl;
 		Mix_FreeChunk(sfxPair.second);
 	}
 	sfx.clear();
 
-	for (auto& font : userFonts) {
-		std::cout << "Destroying User Font: " << font << std::endl;
-		TTF_CloseFont(font);
-	}
-	userFonts.clear();
+	//destroying user fonts causeing the following not to run?
+
+	std::cout << "<RenderWindow> Cleaned." << std::endl;
 
 }

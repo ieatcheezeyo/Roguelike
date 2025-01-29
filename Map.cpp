@@ -614,6 +614,7 @@ void Map::spawnItems() {
                     newItem->description = "Shit, How did you see this?";
                     newItem->equipable = false;
                     newItem->dropable = false;
+                    newItem->cursed = false;
                     newItem->type = treasure;
                 }
 				break;
@@ -626,6 +627,7 @@ void Map::spawnItems() {
                     newItem->description = "Restores some health points.";
                     newItem->equipable = false;
                     newItem->dropable = true;
+                    newItem->cursed = false;
                     newItem->type = recover_hp;
                 }
                 break;
@@ -638,6 +640,7 @@ void Map::spawnItems() {
                     newItem->description = "A standard short sword, good for swinging.";
                     newItem->equipable = true;
                     newItem->dropable = true;
+                    newItem->cursed = false;
                     newItem->type = weapon;
                 }
                 break;
@@ -650,6 +653,7 @@ void Map::spawnItems() {
                     newItem->description = "A puny wooden shield, better than nothing.";
                     newItem->equipable = true;
                     newItem->dropable = true;
+                    newItem->cursed = false;
                     newItem->type = shield;
                 }
                 break;
@@ -662,6 +666,7 @@ void Map::spawnItems() {
                     newItem->description = "A Raw Steak you found on the floor.";
                     newItem->equipable = false;
                     newItem->dropable = true;
+                    newItem->cursed = true;
                     newItem->type = food;
                 }
                 break;
@@ -673,8 +678,8 @@ void Map::spawnItems() {
 }
 
 void Map::spawnEnemies() {
-    Enemy enemySpawner(renderer);
-    for (int i = 0; i < 30; i++) {
+    Enemy enemySpawner(renderer, *this);
+    for (int i = 0; i < 130; i++) {
         enemies.push_back(enemySpawner.createEnemy(mapData));
     }
 }
