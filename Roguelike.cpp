@@ -10,7 +10,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-#define SCALE 4
+#define SCALE 3
 
 int main(int argc, char* argv[]) {
 
@@ -81,7 +81,6 @@ int main(int argc, char* argv[]) {
 			screen.playSFX("gravel");
             for (auto& enemy : map.enemies) {
                 enemy->update(map.mapData, screen.dt());
-                std::cout << enemy->type << ", " << enemy->position.x << ", " << enemy->position.y << std::endl;
             }
         }
 

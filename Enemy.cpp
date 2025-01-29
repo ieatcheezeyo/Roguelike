@@ -6,10 +6,12 @@ std::vector<const char*> EnemyDescriptors = {
 	"Fearless",
 	"Withered",
 	"Healthy",
-	"Sickly"
+	"Sickly",
+	"Greedy",
+	"Foul"
 };
 
-Enemy::Enemy(SDL_Renderer* renderer) : renderer(renderer), scale(4) {
+Enemy::Enemy(SDL_Renderer* renderer) : renderer(renderer), scale(3), alerted(false) {
 
 	ratTexture = IMG_LoadTexture(renderer, "Assets/Images/Enemies/Rat.png");
 
@@ -29,18 +31,20 @@ Enemy::Enemy(SDL_Renderer* renderer) : renderer(renderer), scale(4) {
 		std::cout << "Error Loading Texture: " << IMG_GetError() << std::endl;
 	}
 
+	gobblinTexture = IMG_LoadTexture(renderer, "Assets/Images/Enemies/Gobblin.png");
+
+	if (!gobblinTexture) {
+		std::cout << "Error Loading Texture: " << IMG_GetError() << std::endl;
+	}
+
 	textureToEnemyTypeMap[EnemyType::Rat] = ratTexture;
 	textureToEnemyTypeMap[EnemyType::Bat] = batTexture;
 	textureToEnemyTypeMap[EnemyType::Ghost] = ghostTexture;
+	textureToEnemyTypeMap[EnemyType::Gobblin] = gobblinTexture;
 
 }
 
 Enemy::~Enemy() {
-
-	SDL_DestroyTexture(batTexture);
-	SDL_DestroyTexture(ratTexture);
-	SDL_DestroyTexture(ghostTexture);
-
 	if (texture) {
 		SDL_DestroyTexture(texture);
 	}
@@ -49,7 +53,7 @@ Enemy::~Enemy() {
 Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {
 	Enemy* newEnemy = new Enemy(renderer);
 
-	newEnemy->type = static_cast<EnemyType>(std::rand() % 3);
+	newEnemy->type = static_cast<EnemyType>(std::rand() % EnemyType::COUNT);
 	newEnemy->enemyDescriptor = EnemyDescriptors[std::rand() % EnemyDescriptors.size()];
 
 	newEnemy->enemyStats.def = std::rand() % 10 + 1;
@@ -76,7 +80,7 @@ Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {
 	return newEnemy;
 }
 
-void Enemy::update(std::vector<std::vector<char>>& mapData, float dt) {
+void Enemy::update(std::vector<std::vector<char>>& mapData, double dt) {
 	static bool seeded = false;
 	if (!seeded) {
 		srand(static_cast<unsigned int>(time(0)));

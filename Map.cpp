@@ -674,7 +674,7 @@ void Map::spawnItems() {
 
 void Map::spawnEnemies() {
     Enemy enemySpawner(renderer);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 30; i++) {
         enemies.push_back(enemySpawner.createEnemy(mapData));
     }
 }

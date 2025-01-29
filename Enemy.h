@@ -13,7 +13,9 @@
 enum EnemyType {
 	Rat,
 	Bat,
-	Ghost
+	Ghost,
+	Gobblin,
+	COUNT
 };
 
 typedef struct {
@@ -29,7 +31,7 @@ public:
 	~Enemy();
 
 	Enemy* createEnemy(std::vector<std::vector<char>> mapData);
-	void update(std::vector<std::vector<char>>& mapData, float dt);
+	void update(std::vector<std::vector<char>>& mapData, double dt);
 
 	EnemyType type;
 	const char* enemyDescriptor;
@@ -38,6 +40,7 @@ public:
 	int scale;
 	Vector2 position;
 	int w, h;
+	bool alerted;
 	std::vector<Items*> EnemyLoot;
 
 private:
@@ -45,6 +48,7 @@ private:
 	SDL_Texture* ratTexture;
 	SDL_Texture* batTexture;
 	SDL_Texture* ghostTexture;
+	SDL_Texture* gobblinTexture;
 
 	std::unordered_map<EnemyType, SDL_Texture*> textureToEnemyTypeMap;
 	SDL_Renderer* renderer;
