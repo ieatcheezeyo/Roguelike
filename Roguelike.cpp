@@ -13,27 +13,30 @@
 #define SCALE 3
 
 int main(int argc, char* argv[]) {
-
     SDL_Init(SDL_INIT_EVERYTHING);
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
     RenderWindow screen("", SCREEN_WIDTH, SCREEN_HEIGHT);
+    screen.audio = new AudioManager();
     screen.setBackgroundColor(0, 0, 0);
     screen.setFontColor(0, 0, 0);
 
     int mapWidth = (1280 * 2) / 16;
     int mapHeight = (720 * 3) / 16;
 
-	screen.setCameraBounds((mapWidth * 16) * SCALE, (mapHeight * 16) * SCALE);
+	screen.setCameraBounds(static_cast<float>((mapWidth * 16) * SCALE), static_cast<float>((mapHeight * 16) * SCALE));
 	screen.setViewportSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	screen.setCameraSpeed(300.0f);
 
     InputManager pad;
 
     //Load SFX
-	Mix_Chunk* sfx = screen.loadSFX("gravel", "Assets/SFX/gravel.wav");
+    screen.audio->loadSFX("gravel", "Assets/SFX/gravel.wav");
+    screen.audio->loadSFX("coin", "Assets/SFX/pickupCoin.wav");
+    screen.audio->loadSFX("usePotion", "Assets/SFX/usePotion.wav");
+    screen.audio->loadSFX("eatFood", "Assets/SFX/eatFood.wav");
 
 	//Load Textures
     SDL_Texture* playerTexture = screen.loadTexture("Assets/Images/Player.png");
@@ -42,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     TTF_Font* inventoryFont = screen.createFont("Assets/Fonts/default.ttf", 12);
 
-    Player player(0, 0, SCALE, playerTexture);
+    Player player(0, 0, SCALE, playerTexture, screen.getAudioManager());
 
     Map map(mapWidth, mapHeight, SCALE, screen.getRenderer());
     map.generateDungeon((SDL_GetTicks64() * 64) * SDL_GetPerformanceCounter() * 128);
@@ -55,8 +58,6 @@ int main(int argc, char* argv[]) {
     bool showPlayerIndicator = true;
     float playerIndicatorFlashTimer = 0.0f;
 
-    SDL_Event event;
-
     while (running) {
         pad.update();
 
@@ -67,18 +68,19 @@ int main(int argc, char* argv[]) {
         } else if (pad.button_select && !pad.old_button_select) {
             running = false;
 		} else if (pad.button_start && !pad.old_button_start) {
-
-            inventory = !inventory;
+            minimap = !minimap;
 		}
 
         if (pad.button_y && !pad.old_button_y) {
-            minimap = !minimap;
+            inventory = !inventory;
+        } else if (pad.button_b && !pad.old_button_b) {
+            
         }
 
-        player.update(map, pad, screen.dt());
+        player.update(map, pad, *screen.console, screen.dt());
 
         if (player.hasMoved()) {
-			screen.playSFX("gravel");
+			screen.audio->playSFX("gravel");
             for (auto& enemy : map.enemies) {
                 enemy->update(map.mapData, screen.dt());
             }
@@ -104,7 +106,7 @@ int main(int argc, char* argv[]) {
             playerMinimapX = std::max(minimapX, std::min(playerMinimapX, minimapX + mapWidth * 4 - 1));
             playerMinimapY = std::max(minimapY, std::min(playerMinimapY, minimapY + mapHeight * 4 - 1));
 
-            playerIndicatorFlashTimer += screen.dt();
+            playerIndicatorFlashTimer += static_cast<float>(screen.dt());
             if (playerIndicatorFlashTimer >= 0.5f) {
                 showPlayerIndicator = !showPlayerIndicator;
                 playerIndicatorFlashTimer = 0.0f;
@@ -137,7 +139,6 @@ int main(int argc, char* argv[]) {
         player.isControllable = !inventory;
 
         if (inventory) {
-
             if (pad.button_b && !pad.old_button_b) {
                 inventory = !inventory;
             }
@@ -145,9 +146,7 @@ int main(int argc, char* argv[]) {
             if (pad.dpad_down && !pad.old_dpad_down) {
                 player.inventory.index = (player.inventory.index + 1) % player.inventory.inventory.size();
             } else if (pad.dpad_up && !pad.old_dpad_up) {
-                player.inventory.index = (player.inventory.index == 0)
-                    ? player.inventory.inventory.size() - 1
-                    : player.inventory.index - 1;
+                player.inventory.index = (player.inventory.index == 0) ? player.inventory.inventory.size() - 1 : player.inventory.index - 1;
             }
 
             if (pad.button_a && !pad.old_button_a) {
@@ -157,20 +156,30 @@ int main(int argc, char* argv[]) {
                     case recover_hp:
                     {
                         if (player.getHealth() < 100) {
-                            player.refillHealth(rand() % 18);
+                            int amount = rand() % 18 + 5;
+                            player.refillHealth(amount);
+                            screen.audio->playSFX("usePotion");
+                            screen.console->addMessage("You drank the %s and recovered %i HP.", currentItem->name.c_str(), amount);
                             delete currentItem;
                             currentItem = nullptr;
                             player.inventory.compact();
+                        } else {
+                            screen.console->addMessage("Your HP is already full.");
                         }
                         break;
                     }
                     case food:
                     {
                         if (player.getHealth() < 100) {
-                            player.refillHealth(rand() % 18);
+                            int amount = rand() % 18 + 5;
+                            player.refillHealth(amount);
+                            screen.audio->playSFX("eatFood");
+                            screen.console->addMessage("You ate the %s and recovered %i HP.", currentItem->name.c_str(), amount);
                             delete currentItem;
                             currentItem = nullptr;
                             player.inventory.compact();
+                        } else {
+                            screen.console->addMessage("Your HP is already full.");
                         }
                         break;
                     }
@@ -178,21 +187,19 @@ int main(int argc, char* argv[]) {
                     {
                         if (currentItem->equipable) {
                             if (currentItem->equiped) {
-                                // Unequip the currently selected weapon
                                 currentItem->equiped = false;
-                                player.atk -= currentItem->atk; // Revert stats
+                                player.atk -= currentItem->atk;
+                                screen.console->addMessage("You Unequip the %s.", currentItem->name.c_str());
                             } else {
-                                // Unequip any other equipped weapon and revert stats
                                 for (auto& item : player.inventory.inventory) {
                                     if (item != nullptr && item->type == weapon && item->equiped) {
                                         item->equiped = false;
-                                        player.atk -= item->atk; // Revert stats
+                                        player.atk -= item->atk;
                                     }
                                 }
-
-                                // Equip the selected weapon
                                 currentItem->equiped = true;
-                                player.atk += currentItem->atk; // Add stats
+                                player.atk += currentItem->atk;
+                                screen.console->addMessage("You equiped the %s.", currentItem->name.c_str());
                             }
                         }
                         break;
@@ -201,21 +208,19 @@ int main(int argc, char* argv[]) {
                     {
                         if (currentItem->equipable) {
                             if (currentItem->equiped) {
-                                // Unequip the currently selected shield
                                 currentItem->equiped = false;
-                                player.def -= currentItem->def; // Revert stats
+                                player.def -= currentItem->def;
+                                screen.console->addMessage("You Unequip the %s.", currentItem->name.c_str());
                             } else {
-                                // Unequip any other equipped shield and revert stats
                                 for (auto& item : player.inventory.inventory) {
                                     if (item != nullptr && item->type == shield && item->equiped) {
                                         item->equiped = false;
-                                        player.def -= item->def; // Revert stats
+                                        player.def -= item->def;
                                     }
                                 }
-
-                                // Equip the selected shield
                                 currentItem->equiped = true;
-                                player.def += currentItem->def; // Add stats
+                                player.def += currentItem->def;
+                                screen.console->addMessage("You equiped the %s.", currentItem->name.c_str());
                             }
                         }
                         break;
@@ -233,7 +238,6 @@ int main(int argc, char* argv[]) {
                         int playerTileX = player.position.x / (16 * SCALE);
                         int playerTileY = player.position.y / (16 * SCALE);
 
-                        // Directions for cardinal movement: {dx, dy}
                         std::vector<std::pair<int, int>> directions = {
                             {0, -1}, // North
                             {0, 1},  // South
@@ -249,16 +253,12 @@ int main(int argc, char* argv[]) {
                             int dropTileX = playerTileX + dir.first;
                             int dropTileY = playerTileY + dir.second;
 
-                            // Check if the target tile is valid (' ' or '.')
                             if (map.mapData[dropTileY][dropTileX] == ' ' || map.mapData[dropTileY][dropTileX] == '.') {
-                                // Convert tile coordinates back to world coordinates
                                 int dropWorldX = dropTileX * 16 * SCALE;
                                 int dropWorldY = dropTileY * 16 * SCALE;
 
-                                std::cout << "Dropping item at: Tile(" << dropTileX << ", " << dropTileY << ") "
-                                    << "World(" << dropWorldX << ", " << dropWorldY << ")" << std::endl;
+                                screen.console->addMessage("You drop the %s.", currentItem->name.c_str());
 
-                                // Create the item in the world
                                 Item* newItem = map.items.createItem(dropWorldX, dropWorldY, currentItem->scale, currentItem->name);
                                 if (newItem) {
                                     newItem->atk = currentItem->atk;
@@ -268,25 +268,24 @@ int main(int argc, char* argv[]) {
                                     newItem->equipable = currentItem->equipable;
                                     newItem->dropable = currentItem->dropable;
                                     newItem->type = currentItem->type;
+                                    newItem->cursed = currentItem->cursed;
                                 }
 
-                                // Remove the item from the player's inventory
                                 delete currentItem;
                                 currentItem = nullptr;
                                 player.inventory.compact();
 
                                 itemDropped = true;
-                                break; // Exit the loop once the item is dropped
+                                break;
                             }
                         }
 
                         if (!itemDropped) {
-                            // No valid position found
-                            std::cout << "There isn't enough room to drop the item.\n";
+                            //std::cout << "There isn't enough room to drop the item.\n";
                         }
                     } else {
                         // Not dropable
-                        std::cout << "This item cannot be dropped.\n";
+                        //std::cout << "This item cannot be dropped.\n";
                     }
                 }
             }
@@ -298,6 +297,7 @@ int main(int argc, char* argv[]) {
 
         screen.flip();
         pad.lateUpdate();
+
     }
 
     TTF_Quit();

@@ -7,7 +7,6 @@
 #include <cstdio>
 
 #include <SDL.h>
-#include <SDL_mixer.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <SDL2_gfxPrimitives.h>
@@ -18,6 +17,8 @@
 #include "Items.h"
 #include "Inventory.h"
 #include "Enemy.h"
+#include "TextConsole.h"
+#include "AudioManager.h"
 
 //////////////////////////////////////////////////////////////////
 // FILE   : RenderWindow Class
@@ -43,9 +44,6 @@ public:
 	double getFPS() {
 		return fps;
 	}
-
-	Mix_Chunk* loadSFX(const char* name, const char* file);
-	void playSFX(const char* name);
 
 	TTF_Font* createFont(const char* file, int size);
 
@@ -85,11 +83,19 @@ public:
 	int getScreenHeight();
 	SDL_Renderer* getRenderer();
 
+	AudioManager* getAudioManager();
+
 	void setBackgroundColor(Uint8 r, Uint8 g, Uint8 b);
 	void setDrawColor(Uint8 r, Uint8 g, Uint8 b);
 	void setFontColor(Uint8 r, Uint8 g, Uint8 b);
 	void setFont(TTF_Font* newFont);
 	void setFont();
+
+	//Console
+	TextConsole* console;
+
+	//Audio
+	AudioManager* audio;
 
 private:
 	//Window And Renderer
@@ -110,9 +116,6 @@ private:
 	int fontSize = 24;
 	SDL_Color fontColor;
 	std::vector<TTF_Font*> userFonts;
-
-	//SFX
-	std::unordered_map<const char*, Mix_Chunk*> sfx;
 
 	//Camera
 	Vector2f cameraPosition;
@@ -147,6 +150,9 @@ private:
 	SDL_Texture* InventoryContainerSelectedTexture;
 	SDL_Texture* InventoryContainerDescriptionTexture;
 	SDL_Texture* cursedItemIndecator;
+
+	//Text Console
+	SDL_Texture* textConsoleTexture;
 
 	//Button Prompts
 	std::unordered_map<std::string, SDL_Texture*> buttonPromptTextures;

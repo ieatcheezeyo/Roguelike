@@ -1,7 +1,7 @@
 #include "Player.h"
 
-Player::Player(int x, int y, int scale, SDL_Texture* p_texture)
-    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(rand() % 75 + 10), gold(0), isControllable(true) {
+Player::Player(int x, int y, int scale, SDL_Texture* p_texture, AudioManager* audio)
+    : justMoved(false), scale(scale), moveSpeed(10.0f), holdTimer(0.0), holdDelay(0.1), repeatDelay(0.2), isHolding(false), health(rand() % 75 + 10), gold(0), isControllable(true), audio(audio) {
     position = { x, y };
     targetPosition = position;
     texture = p_texture;
@@ -52,7 +52,7 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
 	targetPosition.y = 0;
 }
 
-void Player::update(Map& map, InputManager& pad, double dt) {
+void Player::update(Map& map, InputManager& pad, TextConsole& console, double dt) {
     if (isControllable) {
         justMoved = false;
         Vector2 tilePos = { position.x / (16 * scale), position.y / (16 * scale) };
@@ -91,7 +91,6 @@ void Player::update(Map& map, InputManager& pad, double dt) {
 
         if (canMove) {
             for (auto& tile : walkableTiles) {
-
                 if (pad.dpad_up && map.mapData[tilePos.y - 1][tilePos.x] == tile) {
                     targetPosition.y -= 16 * scale;
                 } else if (pad.dpad_down && map.mapData[tilePos.y + 1][tilePos.x] == tile) {
@@ -127,28 +126,44 @@ void Player::update(Map& map, InputManager& pad, double dt) {
 
         for (auto it = map.items.items.begin(); it != map.items.items.end();) {
             Item* item = it->get();
-
             bool collides = (position.x == item->x && position.y == item->y);
 
             if (collides) {
+                // If the item is a coin, process it normally
                 if (item->name == "Coin") {
                     gold++;
+                    console.addMessage("You pick up 1 %s.", item->name.c_str());
+                    audio->playSFX("coin");
                     it = map.items.items.erase(it);
                 } else {
-                    if (inventory.addItem(item)) {
-                        std::cout << "Item " << item->name << " added to inventory.\n";
+                    // Check if the inventory can accommodate the item
+                    bool itemAdded = inventory.addItem(item);
+
+                    if (itemAdded) {
+                        // Successfully added the item to the inventory
+                        console.addMessage("You pick up the %s.", item->name.c_str());
                         it = map.items.items.erase(it);
                     } else {
-                        std::cerr << "Failed to add item: " << item->name << " to inventory.\n";
+                        // Use the item's unique memory address or ID as the key to track messages
+                        auto& messageFlag = messageShownForItemThisFrame[item]; // unique key for each item instance
+
+                        // Only show the message once per item instance
+                        if (messageFlag == false) {
+                            console.addMessage("Your inventory is full, Couldn't pick up the %s.", item->name.c_str());
+                            messageFlag = true;
+                        }
                         ++it;
                     }
                 }
             } else {
+                // Reset the message flag when the player moves away from the item
+                messageShownForItemThisFrame.erase(item);  // Remove message flag when player leaves the item
                 ++it;
             }
         }
     }
 }
+
 
 int Player::getHealth() {
     return health;
@@ -164,11 +179,9 @@ void Player::takeDamage(int damage) {
 
 void Player::refillHealth(int ammount) {
     health += ammount;
-
     if (health > 100) {
         health = 100;
     }
-
 }
 
 bool Player::hasMoved() {

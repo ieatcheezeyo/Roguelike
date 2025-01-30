@@ -4,7 +4,7 @@ RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f),
 	screen_w = w;
 	screen_h = h;
 	
-	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN); //| SDL_WINDOW_FULLSCREEN);
+	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN); // | SDL_WINDOW_FULLSCREEN);
 	if (!window) {
 		std::cout << "SDL_CreateWindow() Failed: " << SDL_GetError() << std::endl;
 	}
@@ -23,6 +23,8 @@ RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f),
 	InventoryContainerSelectedTexture = loadTexture("Assets/Images/UI_Inventory_Selected_Container.png");
 	InventoryContainerDescriptionTexture = loadTexture("Assets/Images/UI_Inventory_Description_Container.png");
 
+	textConsoleTexture = loadTexture("Assets/Images/UI_Text_Console.png");
+
 	cursedItemIndecator = loadTexture("Assets/Images/Cursed_Item_Indicator.png");
 
 	buttonPromptTextures["A_BUTTON"] = loadTexture("Assets/Images/A_Button.png");
@@ -32,6 +34,12 @@ RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f),
 
 	backgroundColor = { 0, 0, 0, 255 };
 	fontColor = { 255, 255, 255, 0 };
+
+	console = new TextConsole;
+
+	if (!console) {
+		std::cout << "Console is nullptr! :(" << std::endl;
+	}
 
 	previousTime = 0;
 	currentTime = 0;
@@ -53,20 +61,6 @@ SDL_Texture* RenderWindow::loadTexture(const char* file) {
 
 	textures.push_back(tempTexture);
 	return textures.back();
-}
-
-Mix_Chunk* RenderWindow::loadSFX(const char* name, const char* file) {
-	Mix_Chunk* tempSFX = Mix_LoadWAV(file);
-	if (!tempSFX) {
-		std::cout << "Mix_LoadWAV() Failed: " << Mix_GetError() << std::endl;
-		return nullptr;
-	}
-	sfx[name] = tempSFX;
-	return sfx[name];
-}
-
-void RenderWindow::playSFX(const char* name) {
-	Mix_PlayChannel(-1, sfx.find(name)->second, 0);
 }
 
 TTF_Font* RenderWindow::createFont(const char* file, int size) {
@@ -341,13 +335,11 @@ void RenderWindow::blit(Items& items) {
 }
 
 void RenderWindow::blit(Inventory& inv, int startX, int startY, int slotWidth, int slotHeight) {
-	for (size_t i = 0; i < inv.inventory.size() && i < 10; ++i) { // Render up to 10 slots
-		int x = startX;                    // Slot's X position
-		int y = startY + i * (slotHeight + 5); // Slot's Y position with 5px padding
+	for (size_t i = 0; i < inv.inventory.size() && i < 10; ++i) {
+		int x = startX;
+		int y = startY + i * (slotHeight + 5);
 
-		// Render the slot background
-		setDrawColor(50, 50, 50); // Gray background for empty slots
-		//drawRect("fill", x, y, slotWidth, slotHeight);
+		setDrawColor(50, 50, 50);
 		if (inv.index == i) {
 			blitUiElement(x, y, InventoryContainerSelectedTexture);
 		} else {
@@ -474,6 +466,17 @@ void RenderWindow::drawRect(const char* mode, int x, int y, int w, int h) {
 }
 
 void RenderWindow::flip() {
+	if (console) {
+		console->update(deltaTime);
+		if (!console->messages.empty()) {
+			blitUiElement(251, 535, textConsoleTexture);
+
+			for (size_t i = 0; i < console->messages.size(); ++i) {
+				int yOffset = 544 + (i * 20);
+				print(261, yOffset, console->messages[i]->message.c_str());
+			}
+		}
+	}
 	applyCameraFlash();
 	SDL_RenderPresent(renderer);
 }
@@ -488,6 +491,10 @@ int RenderWindow::getScreenHeight() {
 
 SDL_Renderer* RenderWindow::getRenderer() {
 	return renderer;
+}
+
+AudioManager* RenderWindow::getAudioManager() {
+	return audio;
 }
 
 void RenderWindow::setBackgroundColor(Uint8 r, Uint8 g, Uint8 b) {
@@ -522,12 +529,6 @@ void RenderWindow::clean() {
 	textures.clear();
 
 	//Destroy buttonPromptTextures
-
-	for (auto& sfxPair : sfx) {
-		//std::cout << "<RenderWindow> Destroying SFX: " << sfxPair.first << std::endl;
-		Mix_FreeChunk(sfxPair.second);
-	}
-	sfx.clear();
 
 	//destroying user fonts causeing the following not to run?
 

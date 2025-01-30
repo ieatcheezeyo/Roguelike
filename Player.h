@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <utility>
+#include <unordered_map>
 
 #include <SDL.h>
 
@@ -14,15 +15,17 @@
 #include "Inventory.h"
 #include "Map.h"
 #include "Enemy.h"
+#include "TextConsole.h"
+#include "AudioManager.h"
 
 class Map;
 
 class Player {
 public:
-	Player(int x, int y, int scale, SDL_Texture* p_texture);
+	Player(int x, int y, int scale, SDL_Texture* p_texture, AudioManager* audio);
 	~Player();
 
-	void update(Map& map, InputManager& pad, double dt);
+	void update(Map& map, InputManager& pad, TextConsole& console, double dt);
 	Vector2 getPosition();
 	void findSpawnPoint(std::vector<std::vector<char>> mapData);
 
@@ -52,6 +55,7 @@ public:
 
 private:
 	std::vector<char> walkableTiles = { ' ', '.' };
+	std::unordered_map<Item*, bool> messageShownForItemThisFrame;
 	int health;
 	int gold;
 	double holdTimer;
@@ -59,6 +63,6 @@ private:
 	double repeatDelay;
 	bool isHolding;
 	bool justMoved;
-
+	AudioManager* audio;
 };
 

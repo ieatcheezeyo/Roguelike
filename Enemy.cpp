@@ -109,14 +109,19 @@ void Enemy::update(std::vector<std::vector<char>>& mapData, double dt) {
 			position.x = newX;
 			position.y = newY;
 
-			//If a ghost "walks" over an item it becomes cursed
 			if (type == EnemyType::Ghost) {
 				for (auto& item : map.items.items) {
-					int tileX = (item->x / (16 * map.scale));
-					int tileY = (item->y / (16 * map.scale));
-					if (newX == tileX && newY == tileY) {
-						item->cursed = true;
-						std::cout << "Item Has Been Cursed" << std::endl;
+					if (item->type != ItemType::treasure) {
+						int tileX = (item->x / (16 * map.scale));
+						int tileY = (item->y / (16 * map.scale));
+						if (newX == tileX && newY == tileY) {
+							if (std::rand() % 100 < 30) {
+								item->cursed = true;
+								std::cout << "Item Has Been Cursed" << std::endl;
+							} else {
+								std::cout << "Ghost touched an item and didn't curse it." << std::endl;
+							}
+						}
 					}
 				}
 			}

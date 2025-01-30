@@ -666,7 +666,7 @@ void Map::spawnItems() {
                     newItem->description = "A Raw Steak you found on the floor.";
                     newItem->equipable = false;
                     newItem->dropable = true;
-                    newItem->cursed = true;
+                    newItem->cursed = false;
                     newItem->type = food;
                 }
                 break;

@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Inventory.cpp" />
@@ -143,9 +144,11 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderWindow.cpp" />
     <ClCompile Include="Roguelike.cpp" />
+    <ClCompile Include="TextConsole.cpp" />
     <ClCompile Include="Tile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Inventory.h" />
@@ -154,6 +157,7 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RenderWindow.h" />
+    <ClInclude Include="TextConsole.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>

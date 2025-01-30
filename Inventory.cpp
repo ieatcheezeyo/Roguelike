@@ -2,35 +2,34 @@
 #include <iostream>
 
 Inventory::Inventory(int inventorySize) : inventorySize(inventorySize), index(0) {
-    inventory.resize(inventorySize, nullptr); // Initialize with empty slots
+    inventory.resize(inventorySize, nullptr);
 }
 
-Inventory::Inventory() : inventorySize(10) {
+Inventory::Inventory() : inventorySize(10), index(0) {
     inventory.resize(inventorySize, nullptr);
 }
 
 Inventory::~Inventory() {
-    // Clear items if inventory owns them
     for (auto item : inventory) {
-        delete item; // Ensure safe deletion; skip nullptr
+        delete item;
     }
     inventory.clear();
 }
 
 bool Inventory::addItem(Item* item) {
     if (!item) {
-        std::cerr << "Cannot add a null item to the inventory.\n";
+        //std::cerr << "Cannot add a null item to the inventory.\n";
         return false;
     }
 
     for (size_t i = 0; i < inventory.size(); ++i) {
         if (inventory[i] == nullptr) {
-            inventory[i] = new Item(*item); // Create a deep copy
+            inventory[i] = new Item(*item);
             return true;
         }
     }
 
-    std::cerr << "Inventory full! Cannot add item: " << item->name << ".\n";
+    //std::cerr << "Inventory full! Cannot add item: " << item->name << ".\n";
     return false;
 }
 
@@ -55,7 +54,7 @@ bool Inventory::removeItem(Item* item) {
         *it = nullptr;
         return true;
     }
-    std::cerr << "Item not found in inventory!\n";
+    //std::cerr << "Item not found in inventory!\n";
     return false;
 }
 
