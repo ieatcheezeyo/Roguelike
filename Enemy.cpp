@@ -62,6 +62,24 @@ Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {
 	newEnemy->enemyStats.atk = std::rand() % 10 + 1;
 	newEnemy->enemyStats.speed = std::rand() % 5 + 1;
 
+    switch (newEnemy->type) {
+        case EnemyType::Rat:
+            newEnemy->name = "Rat";
+            break;
+        case EnemyType::Bat:
+            newEnemy->name = "Bat";
+            break;
+        case EnemyType::Ghost:
+            newEnemy->name = "Ghost";
+            break;
+        case EnemyType::Gobblin:
+            newEnemy->name = "Gobblin";
+            break;
+        default:
+            newEnemy->name = "Undefined";
+            break;
+    }
+
 	Vector2 randomPosition;
 	bool validPosition = false;
 
@@ -76,56 +94,93 @@ Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {
 	}
 
 	newEnemy->position = randomPosition;
+	newEnemy->fovRadius = 5;
+	newEnemy->playerStepsWithinFOV = 0;
 
 	newEnemy->texture = textureToEnemyTypeMap[newEnemy->type];
 
 	return newEnemy;
 }
 
-void Enemy::update(std::vector<std::vector<char>>& mapData, double dt) {
-	static bool seeded = false;
-	if (!seeded) {
-		srand(static_cast<unsigned int>(time(0)));
-		seeded = true;
-	}
+void Enemy::update(std::vector<std::vector<char>>& mapData, Player& player, std::vector<Enemy*>& enemies, double dt) {
+    int playerTileX = player.position.x / (16 * map.scale);
+    int playerTileY = player.position.y / (16 * map.scale);
 
-	std::vector<std::pair<int, int>> directions = {
-		{-1, 0},	// up
-		{1, 0},		// down
-		{0, -1},	// left
-		{0, 1},		// right
-		{0, 0}		//none
-	};
+    int dx = abs(playerTileX - position.x);
+    int dy = abs(playerTileY - position.y);
+    int distance = dx + dy;
 
-	int directionIndex = rand() % 5;
-	int dx = directions[directionIndex].first;
-	int dy = directions[directionIndex].second;
+    // Track steps player stays within FOV
+    if (distance <= fovRadius) {
+        if (!alerted) {  // First time detecting the player
+            alerted = true;
+            playerStepsWithinFOV = 0;  // Reset counter on first alert
+        }
+        playerStepsWithinFOV++;  // Increase step count
+    } else {
+        alerted = false;
+        playerStepsWithinFOV = 0;  // Reset if player leaves
+    }
 
-	int newX = position.x + dx;
-	int newY = position.y + dy;
+    // Decide movement
+    int newX = position.x;
+    int newY = position.y;
 
-	if (newX >= 0 && newX < mapData[0].size() && newY >= 0 && newY < mapData.size()) {
-		if (mapData[newY][newX] == ' ' || mapData[newY][newX] == '.') {
-			position.x = newX;
-			position.y = newY;
+    if (alerted && playerStepsWithinFOV >= 3) {
+        // Move toward the player
+        if (playerTileX > position.x) newX++;
+        else if (playerTileX < position.x) newX--;
 
-			if (type == EnemyType::Ghost) {
-				for (auto& item : map.items.items) {
-					if (item->type != ItemType::treasure) {
-						int tileX = (item->x / (16 * map.scale));
-						int tileY = (item->y / (16 * map.scale));
-						if (newX == tileX && newY == tileY) {
-							if (std::rand() % 100 < 30) {
-								item->cursed = true;
-								std::cout << "Item Has Been Cursed" << std::endl;
-							} else {
-								std::cout << "Ghost touched an item and didn't curse it." << std::endl;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+        if (playerTileY > position.y) newY++;
+        else if (playerTileY < position.y) newY--;
+    } else {
+        // Move randomly if not fully alert yet
+        std::vector<std::pair<int, int>> directions = {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {0, 0}
+        };
+
+        int directionIndex = rand() % 5;
+        newX = position.x + directions[directionIndex].first;
+        newY = position.y + directions[directionIndex].second;
+    }
+
+    // Ensure the new position is valid
+    bool isTileEmpty = (mapData[newY][newX] == ' ' || mapData[newY][newX] == '.');
+    bool isNotOnPlayer = !(newX == playerTileX && newY == playerTileY);
+
+    // Check if the new position is occupied by another enemy
+    bool isNotOnOtherEnemy = true;
+    for (Enemy* other : enemies) {
+        if (other != this && other->position.x == newX && other->position.y == newY) {
+            isNotOnOtherEnemy = false;
+            break;  // No need to check further
+        }
+    }
+
+    // Only move if the space is valid
+    if (newX >= 0 && newX < mapData[0].size() &&
+        newY >= 0 && newY < mapData.size() &&
+        isTileEmpty && isNotOnPlayer && isNotOnOtherEnemy) {
+        position.x = newX;
+        position.y = newY;
+    }
+
+    // Ghost special behavior (Curses items)
+    if (type == EnemyType::Ghost) {
+        for (auto& item : map.items.items) {
+            if (item->type != ItemType::treasure) {
+                int tileX = (item->x / (16 * map.scale));
+                int tileY = (item->y / (16 * map.scale));
+                if (position.x == tileX && position.y == tileY) {
+                    if (std::rand() % 100 < 30) {
+                        item->cursed = true;
+                        std::cout << "Item Has Been Cursed" << std::endl;
+                    } else {
+                        std::cout << "Ghost touched an item and didn't curse it." << std::endl;
+                    }
+                }
+            }
+        }
+    }
 }
 

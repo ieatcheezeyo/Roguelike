@@ -10,8 +10,10 @@
 #include "Items.h"
 #include "Types.h"
 #include "Map.h"
+#include "Player.h"
 
 class Map;
+class Player;
 
 enum EnemyType {
 	Rat,
@@ -34,7 +36,7 @@ public:
 	~Enemy();
 
 	Enemy* createEnemy(std::vector<std::vector<char>> mapData);
-	void update(std::vector<std::vector<char>>& mapData, double dt);
+	void update(std::vector<std::vector<char>>& mapData, Player& player, std::vector<Enemy*>& enemies, double dt);
 
 	EnemyType type;
 	const char* enemyDescriptor;
@@ -43,8 +45,11 @@ public:
 	int scale;
 	Vector2 position;
 	int w, h;
+	std::string name;
 	bool alerted;
 	std::vector<Items*> EnemyLoot;
+	int fovRadius;
+	int playerStepsWithinFOV;
 
 private:
 	Map& map;

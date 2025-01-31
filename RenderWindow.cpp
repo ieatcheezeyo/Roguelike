@@ -26,6 +26,7 @@ RenderWindow::RenderWindow(const char* title, int w, int h) : cameraSpeed(5.0f),
 	textConsoleTexture = loadTexture("Assets/Images/UI_Text_Console.png");
 
 	cursedItemIndecator = loadTexture("Assets/Images/Cursed_Item_Indicator.png");
+	enemyAlertTexture = loadTexture("Assets/Images/Enemy_Alert.png");
 
 	buttonPromptTextures["A_BUTTON"] = loadTexture("Assets/Images/A_Button.png");
 	buttonPromptTextures["X_BUTTON"] = loadTexture("Assets/Images/X_Button.png");
@@ -293,6 +294,19 @@ void RenderWindow::blit(Map& map) {
 			);
 
 			SDL_RenderCopy(renderer, enemy->texture, NULL, &dst);
+
+			if (enemy->alerted) {
+				SDL_Rect dst = applyCameraOffset(
+					enemy->position.x * enemy->w * enemy->scale,
+					(enemy->position.y * enemy->h * enemy->scale) - 32,
+					enemy->w * enemy->scale,
+					enemy->h * enemy->scale
+				);
+
+				SDL_RenderCopy(renderer, enemyAlertTexture, NULL, &dst);
+
+			}
+		
 		}
 	}
 

@@ -19,13 +19,14 @@
 #include "AudioManager.h"
 
 class Map;
+class Enemy;
 
 class Player {
 public:
 	Player(int x, int y, int scale, SDL_Texture* p_texture, AudioManager* audio);
 	~Player();
 
-	void update(Map& map, InputManager& pad, TextConsole& console, double dt);
+	void update(Map& map, InputManager& pad, TextConsole& console, std::vector<Enemy*>& enemies, double dt);
 	Vector2 getPosition();
 	void findSpawnPoint(std::vector<std::vector<char>> mapData);
 

@@ -157,5 +157,8 @@ private:
 	//Button Prompts
 	std::unordered_map<std::string, SDL_Texture*> buttonPromptTextures;
 
+	//Misc Textures
+	SDL_Texture* enemyAlertTexture;
+
 };
 

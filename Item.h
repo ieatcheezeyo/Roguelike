@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <string>
+#include <vector>
 
 enum ItemType {
     treasure,
@@ -22,6 +23,7 @@ public:
 
     void update(double dt);
 
+    std::string descriptor;
     std::string name;
     std::string description;
     bool equipable;
@@ -31,6 +33,7 @@ public:
     int atk;
     int def;
     int value;
+
     ItemType type;
 
     SDL_Texture* texture;

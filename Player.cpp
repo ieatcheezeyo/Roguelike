@@ -52,7 +52,7 @@ void Player::findSpawnPoint(std::vector<std::vector<char>> mapData) {
 	targetPosition.y = 0;
 }
 
-void Player::update(Map& map, InputManager& pad, TextConsole& console, double dt) {
+void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vector<Enemy*>& enemies, double dt) {
     if (isControllable) {
         justMoved = false;
         Vector2 tilePos = { position.x / (16 * scale), position.y / (16 * scale) };
@@ -90,16 +90,37 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, double dt
         }
 
         if (canMove) {
+            // Determine intended target position
+            Vector2 intendedTarget = targetPosition;
             for (auto& tile : walkableTiles) {
                 if (pad.dpad_up && map.mapData[tilePos.y - 1][tilePos.x] == tile) {
-                    targetPosition.y -= 16 * scale;
+                    intendedTarget.y -= 16 * scale;
                 } else if (pad.dpad_down && map.mapData[tilePos.y + 1][tilePos.x] == tile) {
-                    targetPosition.y += 16 * scale;
+                    intendedTarget.y += 16 * scale;
                 } else if (pad.dpad_left && map.mapData[tilePos.y][tilePos.x - 1] == tile) {
-                    targetPosition.x -= 16 * scale;
+                    intendedTarget.x -= 16 * scale;
                 } else if (pad.dpad_right && map.mapData[tilePos.y][tilePos.x + 1] == tile) {
-                    targetPosition.x += 16 * scale;
+                    intendedTarget.x += 16 * scale;
                 }
+            }
+
+            // Check if an enemy is at the intended world position
+            bool enemyCollision = false;
+            for (Enemy* enemy : enemies) {
+                // Convert enemy tile position to world coordinates
+                int enemyWorldX = enemy->position.x * (16 * scale);
+                int enemyWorldY = enemy->position.y * (16 * scale);
+
+                if (enemyWorldX == intendedTarget.x && enemyWorldY == intendedTarget.y) {
+                    std::cout << "Attacked " << enemy->enemyDescriptor << " " << enemy->name << std::endl;
+                    enemyCollision = true;
+                    break;  // No need to check further
+                }
+            }
+
+            // Move only if no enemy is blocking
+            if (!enemyCollision) {
+                targetPosition = intendedTarget;
             }
         }
 
