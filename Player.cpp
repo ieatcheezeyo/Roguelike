@@ -113,7 +113,6 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                 if (enemyWorldX == intendedTarget.x && enemyWorldY == intendedTarget.y) {
                     int dmg = rand() % (atk * 2) + (atk / 2) - enemy->enemyStats.def;
                     dmg = (dmg < 0) ? 0 : dmg;
-
                     enemy->health -= dmg;
                     audio->playSFX("hit");
 
@@ -122,6 +121,17 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                     } else {
                         console.addMessage("You hit the " + std::string(enemy->enemyDescriptor) + " " + enemy->name + " for " + std::to_string(dmg) + " damage.");
                     }
+
+                    Vector2 knockbackDirection = { enemyWorldX - position.x, enemyWorldY - position.y };
+                    float magnitude = std::sqrt(knockbackDirection.x * knockbackDirection.x + knockbackDirection.y * knockbackDirection.y);
+
+                    if (magnitude > 0) {
+                        knockbackDirection.x /= magnitude;
+                        knockbackDirection.y /= magnitude;
+                    }
+
+                    enemy->knockbackOffset.x = knockbackDirection.x * 20.0f;
+                    enemy->knockbackOffset.y = knockbackDirection.y * 20.0f;
 
                     enemyCollision = true;
 

@@ -181,3 +181,17 @@ void Enemy::update(std::vector<std::vector<char>>& mapData, Player& player, std:
     }
 }
 
+void Enemy::updateAnimation(double dt) {
+    if (knockbackOffset.x != 0 || knockbackOffset.y != 0) {
+        float decayAmount = knockbackDecay * dt;
+
+        // Reduce knockback smoothly
+        if (std::abs(knockbackOffset.x) < decayAmount) knockbackOffset.x = 0;
+        else knockbackOffset.x -= (knockbackOffset.x > 0) ? decayAmount : -decayAmount;
+
+        if (std::abs(knockbackOffset.y) < decayAmount) knockbackOffset.y = 0;
+        else knockbackOffset.y -= (knockbackOffset.y > 0) ? decayAmount : -decayAmount;
+
+    }
+}
+

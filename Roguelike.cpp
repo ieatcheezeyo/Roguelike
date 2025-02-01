@@ -87,6 +87,10 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        for (auto& enemy : map.enemies) {
+            enemy->updateAnimation(screen.dt());
+        }
+
         screen.clear();
 
         screen.blit(map);

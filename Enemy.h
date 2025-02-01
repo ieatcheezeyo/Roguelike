@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <algorithm>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -37,6 +38,7 @@ public:
 
 	Enemy* createEnemy(std::vector<std::vector<char>> mapData);
 	void update(std::vector<std::vector<char>>& mapData, Player& player, std::vector<Enemy*>& enemies, double dt);
+	void updateAnimation(double dt);
 
 	EnemyType type;
 	const char* enemyDescriptor;
@@ -53,10 +55,8 @@ public:
 	int fovRadius;
 	int playerStepsWithinFOV;
 
-	bool isKnockedBack = false;
-	Vector2 originalPosition;
-	float knockbackDuration = 0.0f;
-	Vector2 knockbackDirection;
+	Vector2 knockbackOffset;
+	float knockbackDecay = 10.0f;
 
 private:
 	Map& map;

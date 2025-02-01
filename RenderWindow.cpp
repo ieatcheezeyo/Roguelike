@@ -287,8 +287,8 @@ void RenderWindow::blit(Map& map) {
 			enemy->h = 16;
 
 			SDL_Rect dst = applyCameraOffset(
-				enemy->position.x * enemy->w * enemy->scale,
-				enemy->position.y * enemy->h * enemy->scale,
+				enemy->position.x * enemy->w * enemy->scale + enemy->knockbackOffset.x,
+				enemy->position.y * enemy->h * enemy->scale + enemy->knockbackOffset.y,
 				enemy->w * enemy->scale,
 				enemy->h * enemy->scale
 			);
