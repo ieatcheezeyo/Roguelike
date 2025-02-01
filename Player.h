@@ -27,6 +27,8 @@ public:
 	~Player();
 
 	void update(Map& map, InputManager& pad, TextConsole& console, std::vector<Enemy*>& enemies, double dt);
+	void updateAnimation(double dt);
+
 	Vector2 getPosition();
 	void findSpawnPoint(std::vector<std::vector<char>> mapData);
 
@@ -53,6 +55,9 @@ public:
 	int def;
 	int baseAtk;
 	int baseDef;
+
+	Vector2 knockbackOffset;
+	float knockbackDecay = 10.0f;
 
 private:
 	std::vector<char> walkableTiles = { ' ', '.' };

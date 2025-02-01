@@ -96,7 +96,8 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                     intendedTarget.y -= 16 * scale;
                 } else if (pad.dpad_down && map.mapData[tilePos.y + 1][tilePos.x] == tile) {
                     intendedTarget.y += 16 * scale;
-                } else if (pad.dpad_left && map.mapData[tilePos.y][tilePos.x - 1] == tile) {
+                }
+                if (pad.dpad_left && map.mapData[tilePos.y][tilePos.x - 1] == tile) {
                     intendedTarget.x -= 16 * scale;
                 } else if (pad.dpad_right && map.mapData[tilePos.y][tilePos.x + 1] == tile) {
                     intendedTarget.x += 16 * scale;
@@ -114,6 +115,7 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                     int dmg = rand() % (atk * 2) + (atk / 2) - enemy->enemyStats.def;
                     dmg = (dmg < 0) ? 0 : dmg;
                     enemy->health -= dmg;
+                    enemy->hasBeenAttacked = true;
                     audio->playSFX("hit");
 
                     if (dmg <= 0) {
@@ -140,6 +142,25 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                         delete enemy;
                         it = enemies.erase(it);
                     } else {
+                        int dmg = rand() % (enemy->enemyStats.atk * 2) + (enemy->enemyStats.atk / 2) - def;
+                        dmg = (dmg < 0) ? 0 : dmg;
+                        health -= dmg;
+
+                        if (dmg > 0) {
+                            console.addMessage("The " + std::string(enemy->enemyDescriptor) + " " + enemy->name + " hits you for " + std::to_string(dmg) + " damage.");
+                            Vector2 knockbackDirection = { enemyWorldX - position.x, enemyWorldY - position.y };
+                            
+                            float magnitude = std::sqrt(knockbackDirection.x * knockbackDirection.x + knockbackDirection.y * knockbackDirection.y);
+                            if (magnitude > 0) {
+                                knockbackDirection.x /= magnitude;
+                                knockbackDirection.y /= magnitude;
+                            }
+
+                            knockbackOffset.x = knockbackDirection.x * 20.0f;
+                            knockbackOffset.y = knockbackDirection.y * 20.0f;
+                        } else {
+                            console.addMessage("The " + std::string(enemy->enemyDescriptor) + " " + enemy->name + " misses you.");
+                        }
                         ++it;
                     }
                     break;
@@ -208,6 +229,17 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
     }
 }
 
+void Player::updateAnimation(double dt) {
+    if (knockbackOffset.x != 0 || knockbackOffset.y != 0) {
+        float decayAmount = knockbackDecay * dt;
+
+        if (std::abs(knockbackOffset.x) < decayAmount) knockbackOffset.x = 0;
+        else knockbackOffset.x -= (knockbackOffset.x > 0) ? decayAmount : -decayAmount;
+
+        if (std::abs(knockbackOffset.y) < decayAmount) knockbackOffset.y = 0;
+        else knockbackOffset.y -= (knockbackOffset.y > 0) ? decayAmount : -decayAmount;
+    }
+}
 
 int Player::getHealth() {
     return health;

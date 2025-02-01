@@ -48,8 +48,9 @@ public:
 	Vector2 position;
 	int w, h;
 	std::string name;
-	bool alerted;
-	bool followingPlayer;
+	bool alerted = false;
+	bool followingPlayer = false;
+	bool hasBeenAttacked = false;
 	int health;
 	std::vector<Items*> EnemyLoot;
 	int fovRadius;

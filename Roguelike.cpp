@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         if (pad.button_y && !pad.old_button_y) {
             inventory = !inventory;
         } else if (pad.button_b && !pad.old_button_b) {
-            screen.cameraFlash(255, 0, 0, 0.5);
+            //screen.cameraFlash(255, 0, 0, 0.5);
         }
 
         player.update(map, pad, *screen.console, map.enemies, screen.dt());
@@ -86,6 +86,8 @@ int main(int argc, char* argv[]) {
                 enemy->update(map.mapData, player, map.enemies, screen.dt());
             }
         }
+
+        player.updateAnimation(screen.dt());
 
         for (auto& enemy : map.enemies) {
             enemy->updateAnimation(screen.dt());

@@ -295,7 +295,7 @@ void RenderWindow::blit(Map& map) {
 
 			SDL_RenderCopy(renderer, enemy->texture, NULL, &dst);
 
-			if (enemy->alerted) {
+			if (enemy->alerted && !enemy->hasBeenAttacked) {
 				SDL_Rect dst = applyCameraOffset(
 					enemy->position.x * enemy->w * enemy->scale,
 					(enemy->position.y * enemy->h * enemy->scale) - 32,
@@ -337,7 +337,7 @@ void RenderWindow::blit(int startX, int startY, Map& minimap) {
 }
 
 void RenderWindow::blit(Player& player) {
-	SDL_Rect dst = applyCameraOffset(player.position.x, player.position.y, player.w, player.h);
+	SDL_Rect dst = applyCameraOffset(player.position.x - player.knockbackOffset.x, player.position.y - player.knockbackOffset.y, player.w, player.h);
 	SDL_RenderCopy(renderer, player.texture, NULL, &dst);
 }
 

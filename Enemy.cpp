@@ -127,6 +127,11 @@ void Enemy::update(std::vector<std::vector<char>>& mapData, Player& player, std:
         alerted = false;
     }
 
+    if (hasBeenAttacked) {
+        followingPlayer = true;
+        alerted = false;
+    }
+
     int newX = position.x;
     int newY = position.y;
 
