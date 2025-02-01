@@ -616,6 +616,7 @@ void Map::spawnItems() {
                     newItem->dropable = false;
                     newItem->cursed = false;
                     newItem->type = treasure;
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
 				break;
 			case 1:
@@ -629,6 +630,7 @@ void Map::spawnItems() {
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = recover_hp;
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             case 2:
@@ -642,6 +644,7 @@ void Map::spawnItems() {
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = weapon;
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             case 3:
@@ -655,6 +658,7 @@ void Map::spawnItems() {
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = shield;
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             case 4:
@@ -668,6 +672,7 @@ void Map::spawnItems() {
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = food;
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             }

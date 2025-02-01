@@ -1388,3 +1388,288 @@ Neighbors:
 W W W 
   W . 
 . W W 
+Unmatched bitmask: 10011011 at (110, 55)
+Neighbors:
+W W W 
+  W . 
+  W W 
+Unmatched bitmask: 10100000 at (69, 95)
+Neighbors:
+W . . 
+  W   
+W     
+Unmatched bitmask: 11111010 at (10, 100)
+Neighbors:
+W   W 
+W W   
+W W W 
+Unmatched bitmask: 10111011 at (139, 39)
+Neighbors:
+W W W 
+. W   
+W W W 
+Unmatched bitmask: 10100000 at (133, 40)
+Neighbors:
+W .   
+  W   
+W .   
+Unmatched bitmask: 11111010 at (83, 60)
+Neighbors:
+W . W 
+W W . 
+W W W 
+Unmatched bitmask: 11101110 at (89, 64)
+Neighbors:
+W . W 
+W W W 
+W   W 
+Unmatched bitmask: 10010110 at (147, 68)
+Neighbors:
+W   W 
+  W W 
+. W . 
+Unmatched bitmask: 10111011 at (51, 71)
+Neighbors:
+W W W 
+. W . 
+W W W 
+Unmatched bitmask: 10011011 at (18, 78)
+Neighbors:
+W W W 
+  W . 
+  W W 
+Unmatched bitmask: 10011011 at (68, 16)
+Neighbors:
+W W W 
+  W . 
+  W W 
+Unmatched bitmask: 10000010 at (133, 36)
+Neighbors:
+W . W 
+. W . 
+.   . 
+Unmatched bitmask: 11111010 at (130, 82)
+Neighbors:
+W . W 
+W W   
+W W W 
+Unmatched bitmask: 10110110 at (90, 83)
+Neighbors:
+W   W 
+  W W 
+W W   
+Unmatched bitmask: 01011011 at (90, 84)
+Neighbors:
+  W W 
+W W   
+. W W 
+Unmatched bitmask: 10000010 at (141, 105)
+Neighbors:
+W . W 
+. W   
+      
+Unmatched bitmask: 10110101 at (67, 109)
+Neighbors:
+W W . 
+  W W 
+W W . 
+Unmatched bitmask: 01011011 at (127, 10)
+Neighbors:
+. W W 
+W W   
+. W W 
+Unmatched bitmask: 10000010 at (142, 72)
+Neighbors:
+W . W 
+  W   
+  . . 
+Unmatched bitmask: 10011011 at (98, 78)
+Neighbors:
+W W W 
+  W . 
+  W W 
+Unmatched bitmask: 01101001 at (116, 80)
+Neighbors:
+  W . 
+W W   
+W . W 
+Unmatched bitmask: 10011011 at (98, 84)
+Neighbors:
+W W W 
+  W . 
+  W W 
+Unmatched bitmask: 10011011 at (70, 7)
+Neighbors:
+W W W 
+  W . 
+. W W 
+Unmatched bitmask: 10011011 at (93, 18)
+Neighbors:
+W W W 
+. W . 
+  W W 
+Unmatched bitmask: 01011010 at (22, 52)
+Neighbors:
+  . W 
+W W . 
+  W W 
+Unmatched bitmask: 10011011 at (130, 59)
+Neighbors:
+W W W 
+. W   
+. W W 
+Unmatched bitmask: 10011011 at (12, 82)
+Neighbors:
+W W W 
+. W   
+  W W 
+Unmatched bitmask: 11101110 at (20, 22)
+Neighbors:
+W . W 
+W W W 
+W   W 
+Unmatched bitmask: 10000010 at (27, 32)
+Neighbors:
+W . W 
+  W   
+. .   
+Unmatched bitmask: 10100000 at (18, 76)
+Neighbors:
+W   . 
+. W   
+W . . 
+Unmatched bitmask: 10010110 at (73, 89)
+Neighbors:
+W   W 
+. W W 
+  W   
+Unmatched bitmask: 10000010 at (129, 21)
+Neighbors:
+W   W 
+  W . 
+.     
+Unmatched bitmask: 10000010 at (42, 71)
+Neighbors:
+W . W 
+. W   
+  .   
+Unmatched bitmask: 10011011 at (115, 73)
+Neighbors:
+W W W 
+. W   
+  W W 
+Unmatched bitmask: 11111010 at (52, 34)
+Neighbors:
+W . W 
+W W   
+W W W 
+Unmatched bitmask: 10110101 at (18, 47)
+Neighbors:
+W W . 
+  W W 
+W W   
+Unmatched bitmask: 10100101 at (76, 53)
+Neighbors:
+W W   
+  W W 
+W . . 
+Unmatched bitmask: 10000010 at (121, 57)
+Neighbors:
+W   W 
+  W   
+      
+Unmatched bitmask: 00101000 at (118, 59)
+Neighbors:
+. .   
+  W . 
+W . W 
+Unmatched bitmask: 11111010 at (115, 92)
+Neighbors:
+W . W 
+W W . 
+W W W 
+Unmatched bitmask: 10100000 at (122, 107)
+Neighbors:
+W . . 
+. W   
+W . . 
+Unmatched bitmask: 10011011 at (43, 9)
+Neighbors:
+W W W 
+  W . 
+. W W 
+Unmatched bitmask: 00101000 at (75, 11)
+Neighbors:
+.   . 
+  W   
+W   W 
+Unmatched bitmask: 10011011 at (12, 39)
+Neighbors:
+W W W 
+  W   
+. W W 
+Unmatched bitmask: 10110101 at (14, 41)
+Neighbors:
+W W . 
+  W W 
+W W . 
+Unmatched bitmask: 10100100 at (26, 80)
+Neighbors:
+W .   
+. W W 
+W . . 
+Unmatched bitmask: 01011010 at (141, 90)
+Neighbors:
+. . W 
+W W   
+. W W 
+Unmatched bitmask: 10110101 at (82, 111)
+Neighbors:
+W W . 
+  W W 
+W W   
+Unmatched bitmask: 10011010 at (122, 82)
+Neighbors:
+W   W 
+  W . 
+. W W 
+Unmatched bitmask: 10111011 at (64, 83)
+Neighbors:
+W W W 
+. W . 
+W W W 
+Unmatched bitmask: 10111011 at (65, 86)
+Neighbors:
+W W W 
+  W . 
+W W W 
+Unmatched bitmask: 10010110 at (140, 86)
+Neighbors:
+W   W 
+. W W 
+. W   
+Unmatched bitmask: 11111010 at (113, 87)
+Neighbors:
+W . W 
+W W   
+W W W 
+Unmatched bitmask: 10011011 at (65, 88)
+Neighbors:
+W W W 
+. W   
+  W W 
+Unmatched bitmask: 10011011 at (53, 18)
+Neighbors:
+W W W 
+. W . 
+. W W 
+Unmatched bitmask: 11101110 at (22, 47)
+Neighbors:
+W   W 
+W W W 
+W   W 
+Unmatched bitmask: 00101000 at (95, 88)
+Neighbors:
+. . . 
+  W   
+W . W 

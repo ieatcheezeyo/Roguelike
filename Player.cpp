@@ -150,25 +150,20 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
             bool collides = (position.x == item->x && position.y == item->y);
 
             if (collides) {
-                // If the item is a coin, process it normally
                 if (item->name == "Coin") {
                     gold++;
                     console.addMessage("You pick up 1 %s.", item->name.c_str());
                     audio->playSFX("coin");
                     it = map.items.items.erase(it);
                 } else {
-                    // Check if the inventory can accommodate the item
                     bool itemAdded = inventory.addItem(item);
 
                     if (itemAdded) {
-                        // Successfully added the item to the inventory
-                        console.addMessage("You pick up the %s.", item->name.c_str());
+                        console.addMessage("You pick up the %s %s.", item->descriptor.c_str(), item->name.c_str());
                         it = map.items.items.erase(it);
                     } else {
-                        // Use the item's unique memory address or ID as the key to track messages
-                        auto& messageFlag = messageShownForItemThisFrame[item]; // unique key for each item instance
+                        auto& messageFlag = messageShownForItemThisFrame[item];
 
-                        // Only show the message once per item instance
                         if (messageFlag == false) {
                             console.addMessage("Your inventory is full, Couldn't pick up the %s.", item->name.c_str());
                             messageFlag = true;
@@ -177,8 +172,7 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                     }
                 }
             } else {
-                // Reset the message flag when the player moves away from the item
-                messageShownForItemThisFrame.erase(item);  // Remove message flag when player leaves the item
+                messageShownForItemThisFrame.erase(item);
                 ++it;
             }
         }

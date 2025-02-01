@@ -47,6 +47,7 @@ public:
 	int w, h;
 	std::string name;
 	bool alerted;
+	bool followingPlayer;
 	std::vector<Items*> EnemyLoot;
 	int fovRadius;
 	int playerStepsWithinFOV;

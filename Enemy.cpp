@@ -11,7 +11,7 @@ std::vector<const char*> EnemyDescriptors = {
 	"Foul"
 };
 
-Enemy::Enemy(SDL_Renderer* renderer, Map& map) : renderer(renderer), scale(map.scale), alerted(false), map(map) {
+Enemy::Enemy(SDL_Renderer* renderer, Map& map) : renderer(renderer), scale(map.scale), alerted(false), followingPlayer(false), map(map) {
 
 	ratTexture = IMG_LoadTexture(renderer, "Assets/Images/Enemies/Rat.png");
 
@@ -110,54 +110,51 @@ void Enemy::update(std::vector<std::vector<char>>& mapData, Player& player, std:
     int dy = abs(playerTileY - position.y);
     int distance = dx + dy;
 
-    // Track steps player stays within FOV
     if (distance <= fovRadius) {
-        if (!alerted) {  // First time detecting the player
+        if (!alerted && !followingPlayer) {
             alerted = true;
-            playerStepsWithinFOV = 0;  // Reset counter on first alert
+            playerStepsWithinFOV = 0;
         }
-        playerStepsWithinFOV++;  // Increase step count
+        playerStepsWithinFOV++;
     } else {
         alerted = false;
-        playerStepsWithinFOV = 0;  // Reset if player leaves
+        playerStepsWithinFOV = 0;
+        followingPlayer = false;
     }
 
-    // Decide movement
+    if (alerted && playerStepsWithinFOV >= 3) {
+        followingPlayer = true;
+        alerted = false;
+    }
+
     int newX = position.x;
     int newY = position.y;
 
-    if (alerted && playerStepsWithinFOV >= 3) {
-        // Move toward the player
+    if (followingPlayer) {
         if (playerTileX > position.x) newX++;
         else if (playerTileX < position.x) newX--;
 
         if (playerTileY > position.y) newY++;
         else if (playerTileY < position.y) newY--;
     } else {
-        // Move randomly if not fully alert yet
-        std::vector<std::pair<int, int>> directions = {
-            {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {0, 0}
-        };
+        std::vector<std::pair<int, int>> directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {0, 0} };
 
-        int directionIndex = rand() % 5;
+        int directionIndex = rand() % directions.size();
         newX = position.x + directions[directionIndex].first;
         newY = position.y + directions[directionIndex].second;
     }
 
-    // Ensure the new position is valid
     bool isTileEmpty = (mapData[newY][newX] == ' ' || mapData[newY][newX] == '.');
     bool isNotOnPlayer = !(newX == playerTileX && newY == playerTileY);
 
-    // Check if the new position is occupied by another enemy
     bool isNotOnOtherEnemy = true;
     for (Enemy* other : enemies) {
         if (other != this && other->position.x == newX && other->position.y == newY) {
             isNotOnOtherEnemy = false;
-            break;  // No need to check further
+            break;
         }
     }
 
-    // Only move if the space is valid
     if (newX >= 0 && newX < mapData[0].size() &&
         newY >= 0 && newY < mapData.size() &&
         isTileEmpty && isNotOnPlayer && isNotOnOtherEnemy) {
@@ -165,18 +162,18 @@ void Enemy::update(std::vector<std::vector<char>>& mapData, Player& player, std:
         position.y = newY;
     }
 
-    // Ghost special behavior (Curses items)
     if (type == EnemyType::Ghost) {
         for (auto& item : map.items.items) {
             if (item->type != ItemType::treasure) {
-                int tileX = (item->x / (16 * map.scale));
-                int tileY = (item->y / (16 * map.scale));
+                int tileX = item->x / (16 * map.scale);
+                int tileY = item->y / (16 * map.scale);
                 if (position.x == tileX && position.y == tileY) {
                     if (std::rand() % 100 < 30) {
                         item->cursed = true;
-                        std::cout << "Item Has Been Cursed" << std::endl;
+                        item->descriptor = "Cursed";
+                        //std::cout << "Item Has Been Cursed" << std::endl;
                     } else {
-                        std::cout << "Ghost touched an item and didn't curse it." << std::endl;
+                        //std::cout << "Ghost touched an item and didn't curse it." << std::endl;
                     }
                 }
             }

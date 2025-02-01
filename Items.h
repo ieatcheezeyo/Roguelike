@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <iostream>
+
 #include "Item.h"
 
 class Items {
@@ -21,10 +22,11 @@ public:
     std::vector<std::unique_ptr<Item>> items;
     std::string description;
 
+    std::vector<std::vector<const char*>> ItemDescriptors;
+
 private:
     int scale;
     SDL_Renderer* renderer;
-
     std::vector<SDL_Texture*> textures;
 
     void initializeItemDefinitions();

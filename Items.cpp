@@ -21,6 +21,19 @@ void Items::initializeItemDefinitions() {
     itemDefinitions["Wooden Shield"];
     itemDefinitions["Coin"];
     itemDefinitions["Raw Steak"];
+
+    ItemDescriptors = {
+        {"Ancient", "Golden", "Jeweled", "Mysterious", "Glowing", "Rare"},
+        {"Refreshing", "Healing", "Revitalizing", "Soothing", "Restorative"},
+        {"Toxic", "Venomous", "Cursed", "Rotten", "Corrupting", "Noxious"},
+        {"Sharp", "Heavy", "Legendary", "Enchanted", "Rusted", "Swift"},
+        {"Delicious", "Stale", "Nutritious", "Moldy", "Exotic", "Spicy"},
+        {"Sturdy", "Reinforced", "Shining", "Ancient", "Tattered", "Resilient"},
+        {"Impenetrable", "Worn", "Decorated", "Rugged", "Engraved", "Holy"},
+        {"Mystic", "Cursed", "Blessed", "Infernal", "Radiant", "Runed"},
+        {"Strange", "Unknown", "Mysterious", "Odd", "Otherworldly"}
+    };
+
 }
 
 SDL_Texture* Items::loadTexture(const std::string& file) {
