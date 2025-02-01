@@ -625,12 +625,12 @@ void Map::spawnItems() {
                     newItem->atk = 0;
                     newItem->def = 0;
                     newItem->value = 10;
-                    newItem->description = "Restores some health points.";
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
+                    newItem->description = "A " + std::string(newItem->descriptor) + " Health Potion, Restores some HP.";
                     newItem->equipable = false;
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = recover_hp;
-                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             case 2:
@@ -639,12 +639,12 @@ void Map::spawnItems() {
                     newItem->atk = rand() % 20;
                     newItem->def = 0;
                     newItem->value = 100 + newItem->atk / 2;
-                    newItem->description = "A standard short sword, good for swinging.";
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
+                    newItem->description = "A " + std::string(newItem->descriptor) + " Short Sword, good for swinging.";
                     newItem->equipable = true;
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = weapon;
-                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             case 3:
@@ -653,12 +653,12 @@ void Map::spawnItems() {
                     newItem->atk = 0;
                     newItem->def = rand() % 15;
                     newItem->value = 50 + newItem->def / 2;
-                    newItem->description = "A puny wooden shield, better than nothing.";
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
+                    newItem->description = "A " + std::string(newItem->descriptor) + " Wooden Shield, it's better than nothing.";
                     newItem->equipable = true;
                     newItem->dropable = true;
                     newItem->cursed = false;
                     newItem->type = shield;
-                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
                 }
                 break;
             case 4:
@@ -667,12 +667,13 @@ void Map::spawnItems() {
                     newItem->atk = 0;
                     newItem->def = 0;
                     newItem->value = 15;
-                    newItem->description = "A Raw Steak you found on the floor.";
+                    newItem->type = food;
+                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
+                    newItem->description = newItem->description = "A " + std::string(newItem->descriptor) + " Raw Steak you found on the floor.";
                     newItem->equipable = false;
                     newItem->dropable = true;
                     newItem->cursed = false;
-                    newItem->type = food;
-                    newItem->descriptor = items.ItemDescriptors[newItem->type][rand() % items.ItemDescriptors[newItem->type].size()];
+
                 }
                 break;
             }

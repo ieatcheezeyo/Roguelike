@@ -90,7 +90,6 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
         }
 
         if (canMove) {
-            // Determine intended target position
             Vector2 intendedTarget = targetPosition;
             for (auto& tile : walkableTiles) {
                 if (pad.dpad_up && map.mapData[tilePos.y - 1][tilePos.x] == tile) {
@@ -104,21 +103,41 @@ void Player::update(Map& map, InputManager& pad, TextConsole& console, std::vect
                 }
             }
 
-            // Check if an enemy is at the intended world position
             bool enemyCollision = false;
-            for (Enemy* enemy : enemies) {
-                // Convert enemy tile position to world coordinates
+            for (auto it = enemies.begin(); it != enemies.end(); ) {
+                Enemy* enemy = *it;
+
                 int enemyWorldX = enemy->position.x * (16 * scale);
                 int enemyWorldY = enemy->position.y * (16 * scale);
 
                 if (enemyWorldX == intendedTarget.x && enemyWorldY == intendedTarget.y) {
-                    std::cout << "Attacked " << enemy->enemyDescriptor << " " << enemy->name << std::endl;
+                    int dmg = rand() % (atk * 2) + (atk / 2) - enemy->enemyStats.def;
+                    dmg = (dmg < 0) ? 0 : dmg;
+
+                    enemy->health -= dmg;
+                    audio->playSFX("hit");
+
+                    if (dmg <= 0) {
+                        console.addMessage("You Miss the " + std::string(enemy->enemyDescriptor) + " " + enemy->name + ".");
+                    } else {
+                        console.addMessage("You hit the " + std::string(enemy->enemyDescriptor) + " " + enemy->name + " for " + std::to_string(dmg) + " damage.");
+                    }
+
                     enemyCollision = true;
-                    break;  // No need to check further
+
+                    if (enemy->health <= 0) {
+                        console.addMessage("You have slain the " + std::string(enemy->enemyDescriptor) + " " + enemy->name + "!");
+                        delete enemy;
+                        it = enemies.erase(it);
+                    } else {
+                        ++it;
+                    }
+                    break;
+                } else {
+                    ++it;
                 }
             }
 
-            // Move only if no enemy is blocking
             if (!enemyCollision) {
                 targetPosition = intendedTarget;
             }

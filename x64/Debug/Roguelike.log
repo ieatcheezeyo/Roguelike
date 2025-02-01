@@ -1,3 +1,18 @@
 ﻿  Enemy.cpp
+  Map.cpp
+  Player.cpp
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(28,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(29,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(157,66): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(158,66): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(160,45): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(169,67): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Player.cpp(170,67): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+  RenderWindow.cpp
+C:\Users\toddd\OneDrive\Desktop\Roguelike\RenderWindow.cpp(354,9): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\toddd\OneDrive\Desktop\Roguelike\RenderWindow.cpp(489,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Roguelike.cpp
+C:\Users\toddd\OneDrive\Desktop\Roguelike\Roguelike.cpp(150,66): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
   Roguelike.vcxproj -> C:\Users\toddd\OneDrive\Desktop\x64\Debug\Roguelike.exe
   15 File(s) copied

@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
     screen.audio->loadSFX("coin", "Assets/SFX/pickupCoin.wav");
     screen.audio->loadSFX("usePotion", "Assets/SFX/usePotion.wav");
     screen.audio->loadSFX("eatFood", "Assets/SFX/eatFood.wav");
+    screen.audio->loadSFX("hit", "Assets/SFX/hit.wav");
 
 	//Load Textures
     SDL_Texture* playerTexture = screen.loadTexture("Assets/Images/Player.png");
@@ -80,7 +81,7 @@ int main(int argc, char* argv[]) {
         player.update(map, pad, *screen.console, map.enemies, screen.dt());
 
         if (player.hasMoved()) {
-			screen.audio->playSFX("gravel");
+            screen.audio->playSFX("gravel");
             for (auto& enemy : map.enemies) {
                 enemy->update(map.mapData, player, map.enemies, screen.dt());
             }

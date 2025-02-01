@@ -11,7 +11,7 @@ std::vector<const char*> EnemyDescriptors = {
 	"Foul"
 };
 
-Enemy::Enemy(SDL_Renderer* renderer, Map& map) : renderer(renderer), scale(map.scale), alerted(false), followingPlayer(false), map(map) {
+Enemy::Enemy(SDL_Renderer* renderer, Map& map) : renderer(renderer), scale(map.scale), alerted(false), followingPlayer(false), map(map), health(rand() % 100 + 10) {
 
 	ratTexture = IMG_LoadTexture(renderer, "Assets/Images/Enemies/Rat.png");
 
@@ -45,11 +45,11 @@ Enemy::Enemy(SDL_Renderer* renderer, Map& map) : renderer(renderer), scale(map.s
 }
 
 Enemy::~Enemy() {
-	//Doen't run?
-	if (texture) {
-		std::cout << "<Enemy> Destroying Texture: " << texture << std::endl;
-		SDL_DestroyTexture(texture);
-	}
+	//Don't run! will remove remaining enemy textures
+	//if (texture) {
+	//	std::cout << "<Enemy> Destroying Texture: " << texture << std::endl;
+	//	SDL_DestroyTexture(texture);
+	//}
 }
 
 Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {

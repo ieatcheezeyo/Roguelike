@@ -48,9 +48,15 @@ public:
 	std::string name;
 	bool alerted;
 	bool followingPlayer;
+	int health;
 	std::vector<Items*> EnemyLoot;
 	int fovRadius;
 	int playerStepsWithinFOV;
+
+	bool isKnockedBack = false;
+	Vector2 originalPosition;
+	float knockbackDuration = 0.0f;
+	Vector2 knockbackDirection;
 
 private:
 	Map& map;
