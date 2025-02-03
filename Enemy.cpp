@@ -58,8 +58,8 @@ Enemy* Enemy::createEnemy(std::vector<std::vector<char>> mapData) {
 	newEnemy->type = static_cast<EnemyType>(std::rand() % EnemyType::COUNT);
 	newEnemy->enemyDescriptor = EnemyDescriptors[std::rand() % EnemyDescriptors.size()];
 
-	newEnemy->enemyStats.def = std::rand() % 10 + 1;
-	newEnemy->enemyStats.atk = std::rand() % 10 + 1;
+	newEnemy->enemyStats.def = std::rand() % 5 + 1;
+	newEnemy->enemyStats.atk = std::rand() % 5 + 1;
 	newEnemy->enemyStats.speed = std::rand() % 5 + 1;
 
     switch (newEnemy->type) {
